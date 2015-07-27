@@ -1,0 +1,17 @@
+{
+    "contents" : "---\ntitle: \"Borardor\"\nauthor: \"Natalia Clivio\"\ndate: \"Sunday, July 26, 2015\"\noutput: html_document\n---\n\nThis is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.\n\nWhen you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:\n\nPor lo tanto el Ancho de banda efectivo, para cada  fuente ON/OFF, está determinada por:\n\n \n$$X[\\tau,\\tau+t]=\\lambda t+Z(t)$$\n\nA continuación se muestra la superficie $\\alpha(s,t)$\n\n\n\n```{r}\nsummary(cars)\n```\n\n\nNote that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.\n",
+    "created" : 1437949000817.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "129988725",
+    "id" : "34D9AFB6",
+    "lastKnownWriteTime" : 0,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_markdown"
+}

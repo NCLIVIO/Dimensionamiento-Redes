@@ -1,0 +1,17 @@
+{
+    "contents" : "##leer traza tráfico\n\npackets<-read.csv(\"C:/Users/NataliaA/Documents/Maestria/Tráfico L3/Bellcore/BC-pAug89.csv\",\n                  header=TRUE,sep=\";\",na.strings=\"NA\",dec=\".\")\n\n\n",
+    "created" : 1429985165009.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2011768584",
+    "id" : "7F833867",
+    "lastKnownWriteTime" : 1437008492,
+    "path" : "~/GitHub/Dimensionamiento-de-Redes/Actividad 3/Modelamiento_Trafico.R",
+    "project_path" : "Modelamiento_Trafico.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}

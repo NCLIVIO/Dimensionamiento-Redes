@@ -1,0 +1,454 @@
+---
+title: "Forecasting Demand"
+author: "Natalia Clivio"
+date: "November, 2014"
+output: pdf_document
+---
+
+This code is for predict the CV subscribers data and write in a cvs file the forecasting and the model´s performance
+
+
+#Load and clean Data
+The file loaded is the CV subscribers from 2005 up to 2014, for each service. The service offering by the company are:
+Internet residential and business, Video on demand and VoIP.
+
+````{r message=FALSE,warning=FALSE}
+library(caret)
+library(forecast)
+library(grofit)
+library(growthmodels)
+
+subs<-read.csv("C:/Users/NataliaA/Documents/DataR/Subscribers_CV.csv",header=TRUE,
+                sep=";",na.strings="NA",dec=",")
+data_subs<-na.exclude(subs[1:5])
+````
+
+*Falta actualizar los datos*
+````{r}
+data_subs 
+````
+
+
+#Data Preparation
+
+````{r message=FALSE,warning=FALSE}
+inTrain<-createDataPartition(y=data_subs$Year, p=0.75, list=FALSE)
+training<-data_subs[inTrain,]
+testing<-data_subs[-inTrain,]
+````
+
+
+#Demand Models for Internet  Residential Subscribers
+
+````{r message=FALSE,warning=FALSE}
+trainres<-data.frame(Year=training$Year,Subs=training$Internet_Res)
+testres<-data.frame(Year=testing$Year,Subs=testing$Internet_Res)
+````
+
+ 
+##1.Predicting with Random Forest
+
+```{r message=FALSE, warning=FALSE}
+modrf<-train(Subs~.,data=trainres,method="rf",prox=TRUE)  #Model
+predrf <- predict(modrf, testres)                         #Prediction
+
+fore1<-data.frame(testres,Random_Forest=predrf)
+fore1
+```
+
+
+````{r echo=FALSE}
+plot(testres,xlab="Year",ylab="Subscribers",col="blue",
+     main="Forecasting Plots")
+lines(testres,lwd=1,col="blue")
+lines(testres$Year,predrf,lwd=2,col="goldenrod4")
+legend("topleft",legend=c("Subs","Random Forest"),
+       col=c("blue","goldenrod4"),lty=1,lwd=2)
+```
+
+
+##2. Predicting with Boosting
+
+```{r message=FALSE,warning=FALSE}
+
+#Boosted Generalized Additive Model
+modbsgam <- train(Subs ~ ., method = "gamboost", data = trainres) 
+predbsgam <- predict(modbsgam, testres)
+
+#Cubist
+modbscub <- train(Subs ~ ., method = "cubist", data = trainres)  
+predbscub <- predict(modbscub, testres)
+
+#Boosted Smoothing Spline
+modbsSm <- train(Subs ~ ., method = "bstSm", data = trainres)   
+predbsSm <- predict(modbsSm, testres)
+
+```
+
+The predictions with boosting models are:
+
+````{r message=FALSE,warning=FALSE}
+fore2<-data.frame(fore1,Pred_Bs_gam=predbsgam,Pred_Bs_cub=predbscub,
+                  Pred_Bs_Sm=predbsSm)
+fore2
+````
+
+````{r echo=FALSE,message=FALSE,warning=FALSE}
+#Subscribers
+plot(testres,xlab="Years",ylab="Subscribers",col="blue",main="Boosting Models")
+lines(testing,lwd=1,col="blue")
+
+#Boosted Generalized Additive Model
+lines(testres$Year,predbsgam,lwd=2,col="mediumvioletred")
+
+#Cubist
+lines(testres$Year,predbscub,lwd=2,col="orangered")
+
+#Boosted Smoothing Spline
+lines(testres$Year,predbsSm,lwd=2,col="darkturquoise")
+
+
+legend("topleft",legend=c("Subs","Generalized Additive","Cubist"
+                          ,"Smoothing Spline"),col=c("blue","mediumvioletred"
+                          ,"orangered","darkturquoise"),lty=1,lwd=2)
+```
+
+
+##3. Predicting with Growth curves
+Simple random sampling of time series is probably not the best way to resample times series data. Hyndman and Athanasopoulos (2013)) discuss rolling forecasting origin techniques that move the training and test sets in time .
+
+````{r}
+tssubs<-ts(data_subs$Internet_Res,start=2005,end=2014)
+tsset<-tssubs/1000000
+
+tstrain<-window(tssubs/1000000,start=2005,end=2011)
+tstest<-window(tssubs/1000000,start=2011,end=2014)       
+
+year<-c(2005:2014)
+years<-c(2005:2011)
+years2<-c(2011:2014)
+
+````
+
+###Linear Model
+````{r message=FALSE,warning=FALSE}
+fitlm<-tslm(tstrain~trend)
+fitlm
+
+predlm<-forecast(fitlm, h=5)
+
+summary(predlm)
+````
+
+###Parabolic Model
+````{r message=FALSE,warning=FALSE}
+time<-1:10
+fitpar=lm(tsset ~ time + I(time^2))
+
+predpar<-predict(fitpar)
+````
+
+###Exponential Model
+In this case turn the unit Million since this model had errors with the initial data set.
+
+````{r message=FALSE,warning=FALSE}
+#Exponential smoothing state space model
+
+fitexp <- ets(tstrain*1000000)
+predexp<-forecast(fitexp,h=5)
+
+predexp
+````
+
+Plots
+
+````{r}
+par(mfrow = c(2, 2))
+
+plot(tsset,lwd=2,main="Internet Subscribers ",ylab="Subscribers [Millones]",col="chocolate4")
+
+plot(tsset,lwd=1,main="Forecast from Parabolic model ",ylab="Subscribers [Millones]",col="blue")
+lines(year,predpar, col="red",lwd=1) 
+
+plot(predlm,main="Forecast from Linear model ",ylab="Subscribers [Millones]")
+lines(tstest,lwd=1,col="orangered")
+
+plot(predexp,main="Forecast from Exponential Model",ylab="Subscribers")
+lines(tstest,lwd=1,col="green2")
+````
+
+The predictions with growth curves are:
+
+````{r}
+set1<-data.frame(predlm)
+x<-set1$Point.Forecast
+set3<-data.frame(predexp)
+y<-set3$Point.Forecast
+z<-predpar[8:10]
+
+set2<-data.frame(Year=c(2012:2016),Linear=x,Exponencial=y/1000000)
+set4<-subset(set2,Year<=2014)
+fore3<-data.frame(set4,Parabolic=z)
+fore3
+````
+
+
+##4.Predicting with Logistic Model 
+
+###Logistic Model
+Using the **growthmodels** package, with the *logistic* function to get the logistic curve
+
+**Usage**
+logistic(t, alpha, beta, k)
+
+**Arguments**
+t     time
+x     size
+alpha upper asymptote
+beta  growth range
+k     growth rate
+
+````{r}
+
+parmlm<-as.list(fitlm$coeff)
+
+alpha<-2 #upper asymptote (M)
+beta<- parmlm$"(Intercept)"  #0.2156 growth range (a)
+k<- parmlm$trend             #0.1581 growth rate (b)
+  
+fitlog <- logistic(1:10, alpha, beta, k)
+
+plot(year,fitlog,main="Forecast from Logistic model",ylab="Subscribers [Millones]")
+lines(year,fitlog,col="blue2")
+lines(tstrain,lwd=1,col="brown2")
+lines(tstest,lwd=1,col="brown2")
+
+fore4<-data.frame(fore3,Logistic=fitlog[8:10])
+fore4
+
+````
+
+
+##5.Modelos Fisher Pry
+Model applied When substitution is driven by superior technology. The new product or service presents some technological advantage over the old one.
+
+````{r message=FALSE,warning=FALSE}
+time<-(year-mean(year))*2
+
+parmlm<-as.list(fitlm$coeff)
+
+a<- parmlm$"(Intercept)"  
+b<- parmlm$trend          
+
+fitpry<-1/(1+exp(-b*(time-a)))
+````
+
+The shape curve **S** represents the adoption of the service, this is the market penetration.
+
+````{r message=FALSE,warning=FALSE}
+
+plot(year,fitpry,lwd=1,col="green2", main="Fisher-Pry Curve",sub="Penetration versus time", xlab="Tiempo",ylab="f")
+lines(year,fitpry,lwd=2,col="green4")
+points(mean(year),0.5,lwd=2,col="blue3",pch=4)
+text(mean(year)+1, 0.5, "(th,fh)")
+points(2014,1,lwd=2,col="blue3",pch=4)
+text(2014, 0.95, "(to)")
+abline(h=0.5,v=mean(year),lty=3,col="dodgerblue")
+````
+
+*Simple substitution Model*
+Its "take over time" defined as the time required to go from f=0.1 to f=0.9. This is inversely proportional to alpha.
+
+**f/(1-f) = exp.2alpha(t-t0)**
+
+where:
+f= old technology fraction replaced by the new.
+alpha= 1/2 annual percentage growth in the early years.
+to= time when f is 1/2
+
+This expression allows one to plot the substitution data in the form of f/(1-f),the resulting points as ilustrated follow:
+
+
+````{r message=FALSE,warning=FALSE}
+alpha<-2*0.5
+to<-mean(year)
+tdelta<-to-years
+
+modpry<-exp(alpha*(years-to))
+
+plot(years,modpry,lwd=2,col="hotpink3", main="Modelo Fisher Pry", xlab="Tiempo",ylab="f/1-f")
+lines(years,modpry,lwd=2,col="coral4")
+lines(tstrain,lty=3,lwd=1,col="orangered")
+````
+
+
+##6.Modelos Bass Model
+This model was developed by Frank Bass in 1969 and it consists of a simple differential equation that describes the process of how new products get adopted in a population.  The basic premise of the model is that adopters can be classified as innovators or as imitators and the speed and timing of adoption depends on their degree of innovativeness and the degree of imitation among adopters.
+
+**m** Total number of potential buyers of the new product
+**p** The coefficient of innovation
+**q** The coefficient of imitation
+
+In order to test the model, linear regression estimates the parameters of the model 
+
+````{r message=FALSE,warning=FALSE}
+
+time<-(years-mean(years))*2
+tsset<-tssubs/1000000
+
+regpol= lm(tstrain ~ time + I(time^2))
+
+parm<-as.list(regpol$coeff)
+
+a<-parm$"(Intercept)"  
+b<-parm$time*(1)           
+c<-parm$"I(time^2)"    
+
+Par<-data.frame(a=a,b=b,c=c)
+Par
+
+ 
+#Bass Model Coefficients
+
+P<-c
+Q<-b+P
+M<-a/P
+
+#M<-(-b-sqrt((b^2)-(4*a*c)))/(2*c)
+#P<-a/M
+#Q<--c*M
+
+
+Coeff<-data.frame(P=P,Q=Q,M=M)
+Coeff
+````
+
+The coefficient p is called the coefficient of innovation, external influence or advertising effect. The coefficient q is called the coefficient of imitation, internal influence or word-of-mouth effect.
+
+
+The Sales Growth Model for Durables are determinated by:
+
+**S(t) = Innovation effect + Imitation effect**
+
+where:
+S(t) Sales at time t
+Innovation effect = p * Remaining Potencial
+Imitation effect = q * Adopters *Remaining Potential
+Remaining Potencial = Total Potential - Q Adopters
+
+
+````{r}
+#Remaining Potencial
+Rem<-2-tstrain
+
+#Innovation effect
+pe<-P*Rem
+
+#Imitation effect
+qe<-Q*tstrain*Rem
+
+#Sales at time t
+
+sales<-pe+qe
+
+plot(sales, main="Sales Growth Model for Durables",lwd=2,lty=1,col="green3")
+lines(tstrain,col="orangered")
+
+````
+
+The Bass Model proposes that the likelihood that someone in the population will
+purchase a new product at a particular time t given that she has not already
+purchased the product until then, is summarized by the following simplification mathematical.
+
+**n(t) = pm + (q - p) [N(t)] -q/m * [N(t)]2**
+
+where:
+n(t) = basic diffusion equation for predicting new product sales
+N(t) = Adopters at time t
+
+````{r message=FALSE,warning=FALSE}
+
+ter1<-P*M
+ter2<-(Q-P)*tsset
+ter3<-(Q/M)*tsset^2
+
+fitbas<-ter1+ter2-ter3
+fitbas
+plot(fitbas,ylab="n[t]",col="hotpink3",lwd=2,main="New product sales")
+
+````
+
+
+##Comparación de Modelos
+
+````{r message=FALSE,warning=FALSE}
+
+#Modelo Lineal
+acc_a<-accuracy(predlm)
+#Modelo Parabólico
+acc_b<-accuracy(predpar,tsset)
+#Modelo Exponencial
+acc_c<-accuracy(predexp)
+#Modelo Logístico
+acc_d<-accuracy(fitlog,tsset)
+#Modelo Gompertz
+#acc_e<-accuracy(predgom)
+#Modelo Fisher-Pry
+acc_f<-accuracy(fitpry,tsset) #Duda
+#Modelo Bass
+acc_g<-accuracy(fitbas,tsset)        #Duda
+
+#Extract ME,RMSE, MAE, MPE, MAPE
+acca<-acc_a[1,1:5]
+accb<-acc_b[1,1:5]
+accc<-acc_c[1,1:5]
+accd<-acc_d[1,1:5]
+accf<-acc_f[1,1:5]
+accg<-acc_g[1,1:5]
+
+acc_all<-rbind(acca,accb,accc,accd,accf,accg)
+Modelos<-c("Linear","Parabolic", "Exponential"
+          ,"Logistic","Fisher-Pry","Bass")
+
+perform<-data.frame(Modelos,acc_all)
+
+perform
+
+````
+
+Extract parameters model
+
+````{r echo=FALSE,message=FALSE,warning=FALSE}
+p1<-as.list(fitlm$coeff)
+p2<-as.list(fitpar$coeff)
+
+a1<-round(p1$"(Intercept)",3)  
+b1<-round(p1$trend,3)           
+
+a2<-round(p2$"(Intercept)",3)  
+b2<-round(p2$time,3)           
+c2<-round(p2$"I(time^2)",3)    
+
+p<-round(P,3)
+q<-round(Q,3)
+m<-round(M,3)
+
+a_all<-rbind(a1,a2,"NA","NA",a1,a2)
+b_all<-rbind(b1,b2,"NA","NA",b1,b2)
+c_all<-rbind("NA",c2,"NA","NA","NA",c2)
+p_all<-rbind("NA","NA","NA","NA","NA",p)
+q_all<-rbind("NA","NA","NA","NA","NA",q)
+m_all<-rbind("NA","NA","NA","NA","NA",m)
+
+
+paramet<-data.frame(Modelos,a=a_all,b=b_all,c=c_all,p=p_all,q=q_all,m=m_all)
+
+paramet
+````
+
+Write  performance of the models  in a **csv** file
+
+
+````{r}
+write.csv(perform,"Performance_models.csv")
+````

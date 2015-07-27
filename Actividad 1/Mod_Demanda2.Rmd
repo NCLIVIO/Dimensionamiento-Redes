@@ -1,0 +1,396 @@
+---
+title: "Actividad 1. Modelamiento de Demanda 2"
+author: "nclivio"
+date: '2014'
+output: pdf_document
+---
+
+##Introducción
+A continuación se detalla la comparación de modelos para pronosticar la demanda empleando modelos de curvas de crecimiento, modelo Bass y el modelo Fisher-Pry. 
+
+##Descripción de los Datos
+Se eligieron datos provenientes del paquete **fpp**, del libro Forecasting: Principles and Practice por Rob J Hyndman and George Athanasopoulos. Se trabajo con un dataset con un formato de series de tiempo anual ya que coincide con el formato de la demanda de usuarios requerido para el desarrollo de la tesis.
+
+
+##Preparación de Datos
+Es necesario cargar el paquete **fpp**, se trabajará con el data set **ausair** Air Transport Passengers Australia, que contiene el total de pasajeros los años comprendidos entre 1970 y 2009.
+
+```{r message=FALSE,warning=FALSE}
+library(fpp)
+data(ausair)
+
+plot(ausair, xlab="Años",ylab="Pasajeros [Millones]",col="salmon",lwd=3, 
+     main="Pasajeros")
+```
+
+Se submuestrean los datos en dos grupos *training* para aplicar el modelo y *testing* para hacer las predicciones.
+
+```{r message=FALSE,warning=FALSE}
+library(caret)
+library(ggplot2)
+
+ts<-ausair
+
+tstrain<-window(ts,start=1970,end=1999)
+tstest<-window(ts,start=1999,end=(2009))       
+
+years<-c(1970:1999)
+datatrain<-data.frame(Años=years,Pasajeros=tstrain)
+
+years2<-c(1999:2009)
+datatest<-data.frame(Años=years2,Pasajeros=tstest)
+
+#inTrain<-createDataPartition(y=data$Años, p=0.75, list=FALSE)
+#training<-data[inTrain,]
+#testing<-data[-inTrain,]
+```
+
+El conjunto de datos *training*, se muestra a continuación:
+```{r message=FALSE,warning=FALSE}
+plot(tstrain, xlab="Años",ylab="Pasajeros [Millones]",col="yellowgreen",lwd=3,main="Datos Training")
+```
+
+
+##Modelos y Predicciones
+````{r message=FALSE,warning=FALSE}
+library(grofit)
+library (forecast)
+````
+
+
+###1.Modelos Lineales
+A continuación se aplica, el modelo de regresión lineal, donde la variable independiente es el tiempo (Años) y la dependiente la cantidad de pasajeros.
+
+```{r message=FALSE,warning=FALSE}
+
+fitlm<-tslm(tstrain~trend)
+
+fitlm
+```
+
+Se hacen las predicciones
+```{r message=FALSE,warning=FALSE}
+
+predlm<-forecast(fitlm, h=15)
+
+```
+
+
+Graficamente la predicción del modelo lineal, se ve asi:
+````{r}
+plot(predlm)
+lines(tstest,lwd=1,col="orangered")
+```
+
+
+###2.Modelos Parabólico
+Aplicando un modelo con tendencia no lineal, de forma polinómica de segundo grado de la forma:
+
+**y = b0 + b1 x + b2 x^2**
+
+Donde:
+b0 : Intersección estimada con el eje y
+b1 : efecto lineal estimado sobre y
+b2 : efecto curvilíneo estimado sobre y
+
+Se obtiene:
+
+````{r message=FALSE,warning=FALSE}
+
+time<-1:30
+regpol = lm(tstrain ~ time + I(time^2))
+
+summary(regpol)
+
+predpol<-predict(regpol)
+
+plot(tstrain,lwd=2,main="Modelo Parabólico",ylab="Pasajeros [Millones]",col="blue")
+lines(years,predpol, col="red") 
+
+````
+
+
+###3.Modelos Exponencial
+La función **ets** del paquete forecast, sirve para ajustar modelos de tipo exponencial.
+*Fuente:* <http://www.statmethods.net/advstats/timeseries.html>
+
+````{r message=FALSE,warning=FALSE}
+
+#Exponential smoothing state space model
+
+fitexp <- ets(tstrain)
+predexp<-forecast(fitexp)
+
+plot(predexp)
+lines(tstest,lwd=1,col="orangered")
+
+predexp
+
+summary(fitexp)
+````
+
+
+###4.Modelos Logístico
+Usando el paquete **growthmodels** se usa la función *logistic* para calcular la curva de crecimiento logistica.
+
+**Usage**
+logistic(t, alpha, beta, k)
+
+**Arguments**
+t     time
+x     size
+alpha upper asymptote
+beta  growth range
+k     growth rate
+
+````{r echo=FALSE, message=FALSE,warning=FALSE}
+library(growthmodels)
+
+alpha<-50 #Nivel de saturación de mercado
+beta<-10  #Rango de crecimiento
+k<-0.1    #Tasa de crecimiento
+  
+fitlog <- logistic(tstrain, alpha, beta, k)
+predlog<-forecast(fitlog)
+plot(predlog,lwd=1,main="Forecast from Logistic model")
+lines(tstrain,lwd=1,col="orangered")
+
+summary(predlog)
+
+````
+
+
+###5.Modelos Gompertz
+Usando el paquete **growthmodels** se usa la función *gompertz* para calcular la curva de crecimiento.
+
+**Usage**
+gompertz(t, alpha, beta, k)
+
+gompertz.inverse(x, alpha, beta, k)
+
+**Arguments**
+t time
+
+x size
+
+alpha upper asymptote
+
+beta growth displacement
+
+k growth rate
+
+````{r message=FALSE,warning=FALSE}
+alphag<-50 #alpha upper asymptote
+betag<-6  #beta growth displacement
+kg<-0.1   #growth rate
+  
+fitgom<-gompertz(tstrain, alphag, betag, kg)
+
+predgom<-forecast(fitgom)
+
+plot(predgom,lwd=1,main="Forecast from Gompertz model")
+lines(tstrain,lwd=1,col="orangered")
+
+
+summary(predgom)
+
+````
+
+
+###5.Modelos Fisher Pry
+Modelo matemático utilizado para predecir la adopción de tecnología cuando la sustitución es impulsado por una tecnología superior en el que el nuevo producto o servicio presenta alguna ventaja tecnológica sobre el anterior.
+
+````{r message=FALSE,warning=FALSE}
+time<-(years-mean(years))*2
+
+parmlm<-as.list(fitlm$coeff)
+
+a<-parmlm$"(Intercept)"  
+b<-parmlm$trend    
+
+fitpry<-1/(1+exp(-b*(time-a)))
+````
+
+Curva **S** representa la adopción del servicio, es decir la penetración del mercado.
+
+````{r message=FALSE,warning=FALSE}
+
+plot(years,fitpry,lwd=1,col="green2", main="Penetración en función del tiempo", xlab="Tiempo",ylab="f")
+lines(years,fitpry,lwd=2,col="green4")
+points(1986.5,0.5,lwd=2,col="blue3",pch=4)
+text(1988, 0.5, "(th,fh)")
+points(1990,1,lwd=2,col="blue3",pch=4)
+text(1990, 0.95, "(to)")
+abline(h=1,v=1990,lty=3,col="dodgerblue")
+abline(h=0.5,v=1986.5,lty=3,col="dodgerblue")
+````
+
+Se ha demostrado que la relación de Fisher Pry se cumple en bastantes sustituciones tecnológicas. Cuando se combina con la idea de que la curva de sustitución sigue también la curva S. 
+
+**f/(1-f) = exp.2alpha(t-t0)**
+
+donde:
+f= fracción de tecnología antigua sustituida por la nueva.
+alpha= 1/2 del crecimiento porcentual anual en los primeros años.
+to= tiempo cuando f= 1/2
+
+````{r message=FALSE,warning=FALSE}
+alpha<-2*0.5
+to<-1990
+tdelta<-to-years
+
+modpry<-exp(alpha*(years-to))
+
+plot(years,modpry,lwd=2,col="hotpink3", main="Modelo Fisher Pry", xlab="Tiempo",ylab="f/1-f")
+lines(years,modpry,lwd=2,col="violet")
+lines(tstrain,lwd=1,col="orangered")
+````
+
+
+###6.Modelos Bass Model
+
+Modelo propuesto por Frank M Bass en 1969. Este modelo propone que la difusión es motivada por la innovación que son los que adoptan un producto y los que los siguen son los imitadores.
+
+**M** Numero total de personas que eventualmente comprará el producto
+**P** Coeficiente de Innovación
+**Q** Coeficiente de Imitación
+
+Para resolver el modelo, se hace una regresión lineal para determinar los coeficientes del modelo
+
+````{r message=FALSE,warning=FALSE}
+
+time<-(years-mean(years))*2
+
+regpol= lm(tstrain ~ time + I(time^2))
+
+parm<-as.list(regpol$coeff)
+
+a<-parm$"(Intercept)"  
+b<-parm$time*(1)           
+c<-parm$"I(time^2)"    
+
+ 
+#Coeficientes del Modelo Bass
+
+P<-c
+Q<-b+P
+M<-a/P
+
+#M<-(-b-sqrt((b^2)-(4*a*c)))/(2*c)
+#P<-a/M
+#Q<--c*M
+
+
+Coeff<-data.frame(P=P,Q=Q,M=M)
+Coeff
+````
+
+
+Una vez se obtienen los parámetros, se reemplazan en la fórmula del modelo:
+
+````{r message=FALSE,warning=FALSE}
+
+ter1<-P*M
+ter2<-(Q-P)*tstrain
+ter3<-(Q/M)*tstrain^2
+
+fitbas<-ter1+ter2-ter3
+predbas<-forecast(fitbas)
+predbas
+````
+
+Graficamente el modelo se comporta:
+
+````{r message=FALSE,warning=FALSE}
+
+plot(predbas,lwd=2,col="green2")
+
+lines(tstrain,lwd=1,col="orangered")
+````
+
+
+##Comparación de Modelos
+
+````{r message=FALSE,warning=FALSE}
+
+#Modelo Lineal
+acc_a<-accuracy(predlm)
+#Modelo Parabólico
+acc_b<-accuracy(predpol,tstrain)
+#Modelo Exponencial
+acc_c<-accuracy(predexp)
+#Modelo Logístico
+acc_d<-accuracy(predlog)
+#Modelo Gompertz
+acc_e<-accuracy(predgom)
+#Modelo Fisher-Pry
+acc_f<-accuracy(fitpry,tstrain) #Duda
+#Modelo Bass
+acc_g<-accuracy(predbas)        #Duda
+
+acc_all<-rbind(acc_a,acc_b,acc_c,acc_d,acc_e,acc_f,acc_g)
+Modelos<-c("Lineal","Parabólico", "Exponencial"
+          ,"Logístico","Gompertz","Fisher-Pry","Bass")
+
+perform<-data.frame(Modelos,acc_all)
+
+p1<-as.list(fitlm$coeff)
+p2<-as.list(regpol$coeff)
+
+a1<-round(p1$"(Intercept)",3)  
+b1<-round(p1$trend,3)           
+
+a2<-round(p2$"(Intercept)",3)  
+b2<-round(p2$time,3)           
+c2<-round(p2$"I(time^2)",3)    
+
+p<-round(P,3)
+q<-round(Q,3)
+m<-round(M,3)
+
+a_all<-rbind(a1,a2,"NA","NA","NA",a1,a2)
+b_all<-rbind(b1,b2,"NA","NA","NA",b1,b2)
+c_all<-rbind("NA",c2,"NA","NA","NA","NA",c2)
+p_all<-rbind("NA","NA","NA","NA","NA","NA",p)
+q_all<-rbind("NA","NA","NA","NA","NA","NA",q)
+m_all<-rbind("NA","NA","NA","NA","NA","NA",m)
+
+
+paramet<-data.frame(Modelos,a=a_all,b=b_all,c=c_all,p=p_all,q=q_all,m=m_all)
+
+perform
+paramet
+````
+
+
+###**OTRAS PRUEBAS**
+Modelo Bass con los datos de Cablevisón
+
+`````{r}
+
+set<-ts(c(0,0,0,6.76237,9.00095,9.7213,11.30214,13.56488,15.19591,17.01668),start=2004,end=2013,frequency=1)
+dat<-cumsum(set)
+
+y<-2004:2013
+tdat<-(y-mean(y))*2
+
+regdat= lm(dat ~ tdat + I(tdat^2))
+a<-8.573783
+b<-1.035411
+c<--0.009617
+
+M<-(-b-sqrt((b^2)-(4*a*c)))/(2*c)
+P<-a/M
+Q<--c*M
+
+ter1<-P*M
+ter2<-(Q-P)*dat
+ter3<-(Q/M)*dat^2
+
+fitbas<-ter1+ter2-ter3
+plot(y,dat,col="blue2",pch=20,ylim=c(0,25),xlab="Años",ylab="Usuarios",main="Bass Model")
+lines(y,dat,col="blue")
+lines(y,fitbas,col="red")
+legend("topleft",legend=c("Datos CV","Bass Model"),col=c("blue","red"),lty=1,lwd=2)
+
+````

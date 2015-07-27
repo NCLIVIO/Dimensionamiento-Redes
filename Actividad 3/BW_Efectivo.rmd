@@ -1,0 +1,134 @@
+---
+title: "Ancho de Banda Efectivo"
+author: "Natalia Clivio"
+date: "May, 2015"
+header-includes:
+  - \usepackage{dcolumn}
+output: pdf_document
+---
+
+Partiendo de un enlace con capacidad C,un Buffer de tamaño B, por el cual hay cursan 4 fuentes ON-OFF, caracterizadas por una taza pico (h) y una taza media (m). Estos servicios son:
+
+Servicio 1: Internet Residencial
+Servicio 2: Internet Comercial
+Servicio 3: Video on Demand
+Servicio 4: Voice over IP
+
+La cual se puede considerar que la probabilidad de sus estados de actividad y no actividad, estan determinados por:
+
+Pactividad = m/h
+Pinactividad = 1- (m/h)
+
+Por lo tanto el Ancho de banda efectivo, para cada  fuente ON/OFF, está determinada por:
+
+$$\alpha(s,t)<-(1/(s*t))*log(1+((m/h)*(exp(s*h*t)-1)))$$
+
+Haciendo cumplir:
+
+$$sum_{i=1}^{4}x_{i}*alpha_{i}<=C$$
+
+dónde:
+$m_{i}<alpha_{i}<h_{i}$
+
+A continuación se van a calcular los coeficientes de ancho de banda $alpha_{i}$ para cada tipo de servicio, con el fin de determinar el ancho de banda por usuario y por servicio necesarios para una capacidad de enlace C y con una calidad de servicio QoS. Conociendo el comportamiento de los usuarios, se podrá determinar el creciemiento en capacidad del enlace en un tiempo determinado.
+
+Para el cálculo de los parámetros de escalas de tiempo (t) y espacio (s), se considerarán valores típicos basados en los análisis de Vasilios A. Siris
+December 1997. <http://www.ics.forth.gr/netgroup/msa/faq_s_t.html#q7>
+
+\begin{tabular*}{0.75\textwidth}{@{\extracolsep{\fill} } | c | c | c | r | }
+  \hline
+  Tipo 1 Internet Residencial &3 &1 & 150 ms \\
+  \hline
+  Tipo 2 Internet Corporativo &3 &1 & 150 ms  \\
+  \hline
+ 
+\end{tabular*}
+
+La tasa media (m) debe ser informada por el usuario, 
+
+
+###Tasa pico (h) conocida, tasa media (m) desconocida
+
+Para una función de costos, definida por:
+
+f(m;M)=a(m)+b(m)M
+
+dónde:
+m es ta tasa media informada por el usuario
+M es la tasa medida
+
+Considerando:
+
+b(h,m) = [exp(s.h.t) -1] / [st(h+m(exp(s.t.h) - 1))]
+a(h,m) = alpha(h,m) - mb(h,m)
+
+dónde:
+st es el punto de operción del enlace
+
+```{r}
+s<-1
+h<-3  #Mbps
+t<-1  #ms
+M<-c(0,1,2,3)
+m<-M  #Mbps
+
+alpha<-(1/(s*t))*log10(1+((m/h)*(exp(s*h*t)-1)))
+
+b<-(exp(s*h*t)-1)/(s*t*(h+(m*(exp(s*h*t)-1))))   #per unit volume
+a<-alpha-(m*b)  #per unit time
+f<-a+(b*M)
+
+slope<-(alpha[3]-alpha[2])/(M[3]-M[2])
+fline<-(slope*(M-1))+alpha[2]
+
+plot(M,alpha,ylab="Ancho de Banda Efectivo [Mbps]",xlab="Tasa Medida [Mbps]",type="o",col="darkblue",lwd=2, main="Función de Ancho de Banda Efectivo" )
+abline(v=M[2],h=alpha[2],lty=3,col="dodgerblue")
+text(M[2],alpha[2]-0.5, "Punto Óptimo")
+points(M[2],alpha[2],lwd=2,col="chocolate1",pch=21)
+fline<-(slope*M)+(alpha[2]-slope)
+lines(M,fline,col="orange")
+
+space<-seq(length=30, from=0.1, to=1)
+time<-seq(length=30, from=0.1, to=2) #ms
+s<-space
+t<-time
+m<-1
+h<-3
+
+# Definimos la función que dibujaremos
+Bw<-function(s,t) {(1/(s*t))*log10(1+((m/h)*(exp(s*h*t)-1)))}   
+z<-outer(s,t,Bw)     # La función outer evalua la función Bw en cada punto(si,tj)
+
+
+
+persp(s,t,z)                    # Un gráfico en perspectiva
+persp(s,t,z,theta=40,phi=0,col = "lightblue", main="Ancho de Banda Efectivo",ticktype = "detailed",xlab="s",ylab="time (ms)",zlab="(s,t)")  
+
+```
+
+
+###Tasa pico (h) y media (m) desconocidas
+
+Considerando una fuente ON/OFF, donde no se conoce h ni m, pero dada una probabilidad G, se quiere conopcer un valor esperado:
+
+Z= 1+ m/h (exp(s.h)-1)
+
+con una función de costos que corresponde a la recta tangente de la curva cóncava del ancho de banda efectivo en el punto z.
+
+f(Z:m,h) = az + m*bz(h)
+
+```{r}
+s<-1
+z<-c(0,1,2,3)
+h<-c(0,1,2,3)  
+
+az<-(1/s)*(log10(z)-(1/z))
+bz<-(exp(s*h)-1)/(s*z*h)
+alphaz<-(1/s)*(log10(z))
+plot(z,alphaz)
+lines(z,alphaz)
+````
+
+
+
+

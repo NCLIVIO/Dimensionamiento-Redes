@@ -1,0 +1,101 @@
+---
+title: "Modelamiento de Tráfico Ethernet"
+author: "Natalia Clivio"
+date: "Saturday, July 18, 2015"
+output: pdf_document
+---
+A continuación se desarrollarán varias pruebas para modelar el tráfico y así determinar su comportamiento el cual me permitirá diseñar, dimensionar y planificar mi red.
+
+Los modelos serán validados con la traza de tráfico de BELLCORE labs, tomada en agosto del 89.
+
+La traza contiene 1000000 de paquetes y se encuentran en dos columnas, en formato ASCII, veinte bytes por línea. La primera línea muestra el tiempo en segundos desde el comienzo de la traza. La segunda columna muestra el tamaño del paquete en bytes, incluyendo parte del encabezado y el código de redundancia cíclica (CRC), tener encuenta que que con el protocolo Ethernet los paquetes poseen un tamaño mínimo de 64 bytes y un máximo de 1.518 bytes.
+
+La traza Bc-pAug89 comienza a las 11:25 el 29 de agosto de 1989, capturó datos alrededor de 3.142,82 s (aproximadamente 1.000.000 paquetes fueron capturados).
+
+
+```{r echo=FALSE, fig.show='hide'}
+packets<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/Bellcore/BC-pAug89.csv",
+                  header=TRUE,sep=";",na.strings="NA",dec=".")
+
+dataset<-data.frame(Seconds=packets$Seconds,Bytes=packets$Bytes)
+
+vector<-dataset$Seconds
+last=tail(vector,n=1)
+unit_time=0.5
+step=last/unit_time
+h<-hist(vector,breaks=step)              
+````
+
+````{r echo=FALSE}
+y<-c(0,h$counts)
+x<-h$breaks
+plot(x,y,type="l",xlab="time (s)",ylab="Packets",main="Data trace", ylim=c(0,500))
+````
+
+ 
+###**PRUEBA 1** 
+Teniendo en cuenta las características autosimilares de esta traza de tráfico y que siga un modelo de movimiento fraccional browniano,  entonces se puede suponer para el modelo una llegada de los datos en intervalos de tiempo t dada por:
+
+$$X[\tau,\tau+t]=\lambda t+Z(t)$$
+ 
+donde Z(t) corresponde al movimiento fraccional browniano con Var[Z(t)]=o^2*t^(2*H) para un parámetro de HURTS *H* entre 0 y 1, entonces: (Kelly(1996))
+
+$$\alpha(s,t)=\lambda + \frac{(\theta^2)(t^(2H-1)}{2}s$$
+
+A continuación se muestra la superficie del ancho de banda efectivo $\alpha(s,t)$ de un modelo con movimiento fraccional browniano, y con los parámetros:
+
+```{r}
+o<-89.668 #theta (bytes per second)
+H<-0.81   # Hurts parameter, obtained by log variance time plot of the data
+l<-138.185  #lambda (bytes per second)
+t<-(seq(length=50, from=0.0001, to=10)) #time parameter (ms)
+s<-(seq(length=50, from=0.00001, to=0.01)) #space parameter
+
+````
+
+Los ejes tienen escala logarítmica (base 10) con s en unidades de $bytes^-1$, t en segundos y $\alpha(s,t)$ en bytes por segundo.
+
+````{r}
+Bw<-function(s,t) {l+((((o^2)*(t^((2*H)-1)))/2)*s)}   
+z<-outer(t,s,Bw) # La función outer evalua la función Bw en cada punto(si,tj)
+
+par(xlog="true",ylog="true")
+persp(t,s,z,theta=20,phi=-0,col = "lightblue", main="Ancho de Banda Efectivo"
+      ,ticktype ="detailed",xlab="time (ms)",ylab="s",zlab="(s,t)")  
+````
+
+###**PRUEBA 2**
+Los pasos a desarrollar en esta prueba se basan en el  trabajo desarrollado en el artículo Caracterización y simulación del tráfico de redes LAN mediante el modelo MMPP, por Moreno, Padilla, Escobar y Correo. Rev. Fac. Ing. Univ. Antioquia. N.o 42. pp. 7-29. Diciembre, 2007.
+
+
+La metodología usada en este trabajo se pude resumir como sigue: 
+1) Análisis del comportamiento semanal del tráfico en la red que se va a analizar
+con el fin de establecer el tiempo de mayor tráfico. 
+
+2) Captura de trazas de tráfico en el canal de salida de Internet que se desea
+analizar en el tiempo determinado en el paso 1. 
+
+3) Procesamiento de los datos de tal forma que se obtengan las variables tiempo y
+tamaño de cada trama capturada.
+
+4) Determinación de la autosimilitud de la traza de tráfi co dentro de las
+restricciones dadas por el parámetro Hurst. 
+
+5) Caracterización del tráfico para estimar los parámetros propios del modelo
+MMPP como matriz de probabilidades del proceso de Markov, vector estacionario y
+vector de lamdas (tasas de generación de paquetes de los estados del proceso de
+Markov). 
+
+6) Generación de la traza virtual. 
+
+7) Evaluación de la exactitud de la traza virtual mediante la prueba de bondad
+de Q-Q. 
+
+8) Simulación del comportamiento del canal de Internet haciendo pasar la fuente de tráfico MMPP por una cola MMPP/D/1 para evaluar el comportamiento del canal de
+Internet frente a cambios en la capacidad dada por el proveedor de servicios. 
+Esto permite analizar la probabilidad de pérdida y tiempo de espera para buffer
+infifi nito y fifi nito cuando se hace variar la utilización del canal. 
+Además, se muestra la aplicación de este método sobre una red real y congestionada como lo es la RDUPBB.
+
+
+

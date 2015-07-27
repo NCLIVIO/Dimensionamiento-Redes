@@ -1,0 +1,224 @@
+---
+title: "Actividad 1.Modelamiento de la Demanda"
+author: "Natalia A Clivio V"
+date: '2014'
+output: html_document
+---
+
+##Introducci?n
+A continuaci?n se detalla la comparaci?n de varios modelos para pronosticar la demanda. 
+
+##Descripci?n de los Datos
+Se eligieron datos provenientes del paquete **fpp**, del libro Forecasting: Principles and Practice por Rob J Hyndman and George Athanasopoulos. Se trabajo con un dataset con un formato de series de tiempo anual ya que coincide con el formato de la demanda de usuarios requerido para el desarrollo de la tesis.
+
+##Preparaci?n de Datos
+Es necesario cargar el paquete **fpp**, se trabajar? con el data set **ausair** Air Transport Passengers Australia, que contiene el total de pasajeros los a?os comprendidos entre 1970 y 2009.
+
+```{r message=FALSE}
+library(fpp)
+data(ausair)
+
+plot(ausair, xlab="A?os",ylab="Pasajeros [Millones]",col="yellowgreen",lwd=3)
+```
+
+Se submuestrean los datos en dos grupos *training* para aplicar el modelo y *testing* para hacer las predicciones.
+
+```{r message=FALSE}
+library(caret)
+library(ggplot2)
+
+ts1<-ausair
+years<-c(1970:2009)
+data<-data.frame(A?os=years,Pasajeros=ts1)
+
+inTrain<-createDataPartition(y=data$A?os, p=0.75, list=FALSE)
+training<-data[inTrain,]
+testing<-data[-inTrain,]
+```
+
+El conjunto de datos *training*, se muestra a continuaci?n:
+```{r}
+qplot(A?os,Pasajeros,data=training,xlab="A?os",ylab="Pasajeros [Millones]",
+      main="Conjunto de Datos Training" )
+```
+
+##Modelos y Predicciones
+
+###1.Prediciendo con Modelos Lineales
+
+A continuaci?n se aplica, el modelo de regresi?n lineal, donde la variable independiente es el tiempo (A?os) y la dependiente la cantidad de pasajeros.
+
+
+```{r}
+modglm<-train(Pasajeros~.,data=training,method="glm")
+
+modglm$finalModel
+```
+
+Se hacen las predicciones
+```{r}
+predglm <- (predict(modglm, testing))
+testglm<-data.frame(testing,Predicci?n_glm=predglm)
+testglm
+```
+
+Graficamente la predicci?n del modelo lineal, se ve asi:
+````{r}
+plot(testing,xlab="A?os",ylab="Pasajeros [Millones]",col="blue",
+     main="Modelo Lineal Generalizado")
+lines(testing$A?os,testing$Pasajeros,lwd=1,col="blue")
+lines(testing$A?os,predglm,lwd=2,col="deeppink3")
+```
+
+###2.Prediciendo con ?rboles
+
+Se emplea el algoritmo de ?boles de decisi?n, el cual es mucho mas preciso que los modelos lineales.
+
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+library(rattle)
+modtr<-train(Pasajeros~.,data=training,method="rpart")
+
+modtr$finalModel
+fancyRpartPlot(modtr$finalModel,main="Clasificaci?n en ?rbol") 
+```
+
+Se hacen las predicciones
+```{r message=FALSE,warning=FALSE}
+predtr <- predict(modtr, newdata=testing)
+testtr<-data.frame(testglm,Predicci?n_tree=predtr)
+testtr
+```
+
+````{r echo=FALSE}
+plot(testing,xlab="A?os",ylab="Pasajeros [Millones]",col="blue",
+     main="Comparaci?n de Modelos")
+lines(testing,lwd=1,col="blue")
+lines(testing$A?os,predglm,lwd=2,col="mediumvioletred")
+lines(testing$A?os,predtr,lwd=2,col="green3")
+legend("topleft",legend=c("Datos","Generalized Linear","Tree"),
+       col=c("blue","mediumvioletred","green3"),lty=1,lwd=2)
+```
+
+###3. Prediciendo con "Random Forest"
+
+Este modelo es m?s robusto, pero aumenta su velocidad de procesamiento, es m?s dificil de interpretar y puede ocasionar sobreajustes. 
+```{r message=FALSE, warning=FALSE}
+modrf<-train(Pasajeros~.,data=training,method="rf",prox=TRUE)
+modrf
+modrf$finalModel
+```
+
+Prediciendo valores
+```{r message=FALSE,warning=FALSE}
+predrf <- predict(modrf, testing)
+testrf<-data.frame(testtr,Predicci?n_rf=predrf)
+testrf
+```
+
+````{r echo=FALSE}
+plot(testing,xlab="A?os",ylab="Pasajeros [Millones]",col="blue",main="Comparaci?n de Modelos")
+lines(testing,lwd=1,col="blue")
+lines(testing$A?os,predglm,lwd=2,col="mediumvioletred")
+lines(testing$A?os,predtr,lwd=2,col="green3")
+lines(testing$A?os,predrf,lwd=2,col="goldenrod4")
+legend("topleft",legend=c("Datos","Generalized Linear","Tree","Random forest"),col=c("blue","mediumvioletred","green3","goldenrod4"),lty=1,lwd=2)
+```
+
+
+###4. Prediciendo con "Boosting"
+La motivaci?n para el algoritmo *Boosting* es un procedimiento que combina las 
+salidas de muchos clasificadores "d?biles" para producir un "comit?" poderoso. 
+Desde esta perspectiva *Boosting* tiene un parecido al *Bagging* y otros enfoques basados en los comit?s. 
+
+Se basa en predictores d?biles y debilidad de los *learners* juegan un papel importante en las t?cnicas de *Bagging* y *Boosting* que s?lo ahora est?n haciendo su camino en la previsi?n y an?lisis de negocio, aunque la comunidad de *machine learning*.
+
+Basandose en <http://topepo.github.io/caret/Boosting.html>
+
+```{r message=FALSE,warning=FALSE}
+
+#Boosted Generalized Additive Model
+modbsgam <- train(Pasajeros ~ ., method = "gamboost", data = training) 
+predbsgam <- predict(modbsgam, testing)
+
+#Boosted Tree
+modbstt <- train(Pasajeros ~ ., method = "bstTree", data = training)   
+predbstt <- predict(modbstt, testing)
+
+#Cubist
+modbscub <- train(Pasajeros ~ ., method = "cubist", data = training)  
+predbscub <- predict(modbscub, testing)
+
+#Boosted Smoothing Spline
+modbsSm <- train(Pasajeros ~ ., method = "bstSm", data = training)   
+predbsSm <- predict(modbsSm, testing)
+
+```
+
+Graficamente las predicciones usando los algoritmos de Boosting
+
+````{r echo=FALSE}
+#Datos a predecir
+plot(testing,xlab="A?os",ylab="Pasajeros [Millones]",col="blue",main="Comparaci?n de Modelos Boosting")
+lines(testing,lwd=1,col="blue")
+
+#Boosted Generalized Additive Model
+lines(testing$A?os,predbsgam,lwd=2,col="mediumvioletred")
+
+#Boosted Tree
+lines(testing$A?os,predbstt,lwd=2,col="green3")
+
+#Cubist
+lines(testing$A?os,predbscub,lwd=2,col="orangered")
+
+#Boosted Smoothing Spline
+lines(testing$A?os,predbsSm,lwd=2,col="darkturquoise")
+
+
+legend("topleft",legend=c("Datos","Generalized Additive","Tree","Cubist"
+                          ,"Smoothing Spline"),col=c("blue","mediumvioletred"
+                          ,"green3","orangered","darkturquoise"),lty=1,lwd=2)
+```
+
+
+Las predicciones de los anteriores modelos son:
+
+````{r message=FALSE,warning=FALSE}
+testbs<-data.frame(testrf,Pred_Bs_gam=predbsgam,Pred_Bs_cub=predbscub,
+                   Pred_Bs_stt=predbstt,Pred_Bs_Sm=predbsSm)
+testbs
+````
+
+##Desempe?o de los modelos
+
+Para evaluar los modelos, se calcula:
+
+*Error medio* **(ME)**:Mean Error 
+
+*Error cuadrado medio* **(RMSE)**:Root Mean Square Error
+
+*Desviaci?n adboluta media* **(MAE)**: Mean Absolute Error
+
+*Error porcentual medio* **(MPE)**: Mean Porcentual Error
+
+*Error porcentual absoluto medio* **(MAPE)**: Mean Absolute Porcentual Error
+
+````{r message=FALSE,warning=FALSE}
+library(forecast)
+
+acc_a<-accuracy(predglm,testrf$Pasajeros, test=NULL)
+acc_b<-accuracy(predtr,testrf$Pasajeros, test=NULL)
+acc_c<-accuracy(predrf,testrf$Pasajeros, test=NULL)
+acc_d<-accuracy(predbsgam,testrf$Pasajeros, test=NULL)
+acc_e<-accuracy(predbstt,testrf$Pasajeros, test=NULL)
+acc_f<-accuracy(predbscub,testrf$Pasajeros, test=NULL)
+acc_g<-accuracy(predbsSm,testrf$Pasajeros, test=NULL)
+
+acc_all<-rbind(acc_a,acc_b,acc_c,acc_d,acc_e,acc_f,acc_g)
+models<-c("Generalized Linear","Tree","Random forest", "Bs_Generalized Additive"
+          ,"Bs_Tree","Bs_Cubist","Bs_Smoothing Spline")
+
+perf<-data.frame(models,acc_all)
+perf
+
+````
+
