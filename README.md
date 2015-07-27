@@ -1,4 +1,4 @@
-Dimensionamiento-de-Redes
+Dimensionamiento de Redes
 =========================
 
 Dimensionamiento de Redes Multiservicio
