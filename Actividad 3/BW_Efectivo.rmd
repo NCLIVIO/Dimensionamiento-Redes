@@ -1,11 +1,18 @@
 ---
-title: "Ancho de Banda Efectivo"
+title: "Cálculo de Ancho de Banda Efectivo"
 author: "Natalia Clivio"
-date: "May, 2015"
+date: "2015"
 header-includes:
   - \usepackage{dcolumn}
 output: pdf_document
 ---
+El ancho de banda efectivo es una medida usada en el dimensionamiento y planeamiento de redes de comunicaciones modernas. 
+
+El objetivo de este análisis, es estimar el ancho de banda efectivo para distintos flujos de tráfico generados y la traza conocida de Bellcore.
+
+Para calcular el ancho de banda efectivo, se debe conocer su función, lo cual permite desarrollarla de manera numérica, pero si no se tiene el modelo como por ejemplo para una traza real, se debe calcular de manera estadística.
+
+Inicialmente se analizarán modelos sencillos como proceso de Poisson y movimiento browniano, seguido de Fluido de Markov ON/OFF, movimiento fraccional browniano y modelo de FARIMA. Estos modelos presentan una variadad de características observadas en muchas formas en el tráfico real.
 
 Partiendo de un enlace con capacidad C,un Buffer de tamaño B, por el cual hay cursan 4 fuentes ON-OFF, caracterizadas por una taza pico (h) y una taza media (m). Estos servicios son:
 

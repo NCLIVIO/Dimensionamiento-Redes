@@ -1,39 +1,110 @@
 ---
-title: "Modelamiento de Tráfico Ethernet"
+title: "Caracterización de Tráfico Ethernet"
 author: "Natalia Clivio"
-date: "Saturday, July 18, 2015"
+date: "2015"
 output: pdf_document
 ---
-A continuación se desarrollarán varias pruebas para modelar el tráfico y así determinar su comportamiento el cual me permitirá diseñar, dimensionar y planificar mi red.
+El ancho de banda efectivo es una medida usada en el dimensionamiento y planeamiento de redes de comunicaciones modernas. 
 
-Los modelos serán validados con la traza de tráfico de BELLCORE labs, tomada en agosto del 89.
+El objetivo de este análisis, es estimar el ancho de banda efectivo para distintos flujos de tráfico generados y la traza conocida de Bellcore.
 
-La traza contiene 1000000 de paquetes y se encuentran en dos columnas, en formato ASCII, veinte bytes por línea. La primera línea muestra el tiempo en segundos desde el comienzo de la traza. La segunda columna muestra el tamaño del paquete en bytes, incluyendo parte del encabezado y el código de redundancia cíclica (CRC), tener encuenta que que con el protocolo Ethernet los paquetes poseen un tamaño mínimo de 64 bytes y un máximo de 1.518 bytes.
+En cuanto a la estimación del ancho de banda efectivo hay dos enfoques, el paramétrico y el no paramétrico. En el enfoque paramétrico se asume un modelo de la fuente de tráfico y a partir de las trazas se estima un conjunto de parámetros de dicho modelo. De esa forma se obtiene un estimador del ancho de banda efectivo y además es posible calcular su intervalo de confianza.
 
-La traza Bc-pAug89 comienza a las 11:25 el 29 de agosto de 1989, capturó datos alrededor de 3.142,82 s (aproximadamente 1.000.000 paquetes fueron capturados).
+En el enfoque no paramétrico, no se asume un modelo específico del tráfico y se procura construir un estimador del ancho de banda efectivo calculando el valor esperado que aparece en la función generatriz de momentos a través de promedios temporales en la traza.
 
+Inicialmente se analizarán modelos sencillos como proceso de Poisson y movimiento browniano, seguido de Fluido de Markov ON/OFF, movimiento fraccional browniano y modelo de FARIMA. Estos modelos presentan una variadad de características observadas en muchas formas en el tráfico real.
 
-```{r echo=FALSE, fig.show='hide'}
-packets<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/Bellcore/BC-pAug89.csv",
-                  header=TRUE,sep=";",na.strings="NA",dec=".")
+##Traza 1
+####Flujo con Movimiento Browniano
+Calculando en ancho de banda efectivo para un flujo con movimiento browniano.
+Esta traza tiene una longitud de 512 con los siguientes prámetros:
 
-dataset<-data.frame(Seconds=packets$Seconds,Bytes=packets$Bytes)
+Taza promedio de arribo $\{hat}mu = 50.83$
+Varianza de la taza de arribo $\{hat}theta^2 = 30.18$
 
-vector<-dataset$Seconds
-last=tail(vector,n=1)
-unit_time=0.5
-step=last/unit_time
-h<-hist(vector,breaks=step)              
+El flujo tiene una taza de servicio de C=52, un buffer de tamaño B=5.
+
+Calculando el punto crítico $\alpha(s,t)$
+
+````{r}
+C<-52
+B<-5
+l<-50.83
+t2<-30.18
+u<-l
+
+s<-(2*(C-u))/t2
+t<-B/(C-u)
+
+Bw_MB<-u+((s*t2)/2)
 ````
 
-````{r echo=FALSE}
-y<-c(0,h$counts)
-x<-h$breaks
-plot(x,y,type="l",xlab="time (s)",ylab="Packets",main="Data trace", ylim=c(0,500))
+Considerando el intervalo de confiaza para calcular el ancho de banda para un flujo con movimiento browniano, determinado por:
+
+$$[\mu_l + \frac{(s\theta_l^2)}{2},\mu_u + \frac{(s\theta_u^2)}{2}]$$
+El intervalo de confianza será:
+````{r}
+ul<-
+t2l<-
+uh<-
+t2h<-
+LB<-ul+((s*t2l)/2)
+HB<-uh+((s*t2h)/2)
 ````
 
- 
-###**PRUEBA 1** 
+
+##Traza 2
+###Fuente de fluido ON/OFF
+Considerando un flujo de longitud 512, con parámetros:
+
+Probabilidad del estado 1 al 2 $\mu = 0.4$
+Probabilidad del estado 2 al 1 $\lambda = 0.3$
+Trabajo que genera el estado 1 $\h=3.0$
+
+El flujo tiene una taza de servicio de C=2, un buffer de tamaño B=15.
+
+Calculando el punto crítico $\alpha(s,t)$
+
+````{r}
+C<-2
+B<-15
+l<-0.3
+u<-0.4
+h<-3.0
+
+s<-(2*(C-u))/t2
+pi1<-l/(l+u)
+pi2<-u/(l+u)
+
+Bw_F<-(1/s)*log10(((exp(s*h))*pi1)+pi2)
+````
+
+
+##Traza 3
+###Movimiento fraccional browniano
+Esta traza corresponde a un modelo con dependencia de rango largo, numerosos estudios sugieren que este es el comportamiento de las redes modernas de tráfico. A continuación se calcula el ancho de banda efectivo de un movimiento fraccional browniano con parámetro Hurst H=0.75, y los siguientes parámetros:
+
+Taza promedio de arribo $\{hat}mu = 35.09$
+Varianza de la taza de arribo $\{hat}theta^2 = 25.53$
+
+El flujo tiene una taza de servicio de C=37, un buffer de tamaño B=5.
+
+Calculando el punto crítico $\alpha(s,t)$
+
+````{r}
+C<-37
+B<-5
+u<-35.09
+t2<-25.53
+H<-0.75
+
+s<-(B+(C+u)*t)/(t2*t^(2*H)) #0.0355
+t<-(B/(C-u))*(H/(1-H))      #8
+
+Bw_MFB<-u+(((s*t2)/2)*(t^(2*H-1)))
+````
+
+Parte 2
 Teniendo en cuenta las características autosimilares de esta traza de tráfico y que siga un modelo de movimiento fraccional browniano,  entonces se puede suponer para el modelo una llegada de los datos en intervalos de tiempo t dada por:
 
 $$X[\tau,\tau+t]=\lambda t+Z(t)$$
@@ -69,38 +140,61 @@ alpha<-log10(l+((((o^2)*(t^((2*H)-1)))/2)*s))
 
 
 
-###**PRUEBA 2**
-Los pasos a desarrollar en esta prueba se basan en el  trabajo desarrollado en el artículo Caracterización y simulación del tráfico de redes LAN mediante el modelo MMPP, por Moreno, Padilla, Escobar y Correo. Rev. Fac. Ing. Univ. Antioquia. N.o 42. pp. 7-29. Diciembre, 2007.
+##Traza 4
+###Stable Farima
 
 
-La metodología usada en este trabajo se pude resumir como sigue: 
-1) Análisis del comportamiento semanal del tráfico en la red que se va a analizar
-con el fin de establecer el tiempo de mayor tráfico. 
+##Traza 5
+### Traza de tráfico Real Bellcore
 
-2) Captura de trazas de tráfico en el canal de salida de Internet que se desea
-analizar en el tiempo determinado en el paso 1. 
+Esta traza de tráfico de BELLCORE labs, esta traza contiene 1000000 de paquetes y se encuentran en dos columnas, en formato ASCII, veinte bytes por línea. La primera línea muestra el tiempo en segundos desde el comienzo de la traza. La segunda columna muestra el tamaño del paquete en bytes, incluyendo parte del encabezado y el código de redundancia cíclica (CRC), tener encuenta que que con el protocolo Ethernet los paquetes poseen un tamaño mínimo de 64 bytes y un máximo de 1.518 bytes.
 
-3) Procesamiento de los datos de tal forma que se obtengan las variables tiempo y
-tamaño de cada trama capturada.
+La traza Bc-pAug89 comienza a las 11:25 el 29 de agosto de 1989, capturó datos alrededor de 3.142,82 s (aproximadamente 1.000.000 paquetes fueron capturados).
 
-4) Determinación de la autosimilitud de la traza de tráfi co dentro de las
-restricciones dadas por el parámetro Hurst. 
 
-5) Caracterización del tráfico para estimar los parámetros propios del modelo
-MMPP como matriz de probabilidades del proceso de Markov, vector estacionario y
-vector de lamdas (tasas de generación de paquetes de los estados del proceso de
-Markov). 
+```{r echo=FALSE, fig.show='hide'}
+packets<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/Bellcore/BC-pAug89.csv",
+                  header=TRUE,sep=";",na.strings="NA",dec=".")
 
-6) Generación de la traza virtual. 
+dataset<-data.frame(Seconds=packets$Seconds,Bytes=packets$Bytes)
 
-7) Evaluación de la exactitud de la traza virtual mediante la prueba de bondad
-de Q-Q. 
+vector<-dataset$Seconds
+last=tail(vector,n=1)
+unit_time=0.5
+step=last/unit_time
+h<-hist(vector,breaks=step)              
+````
 
-8) Simulación del comportamiento del canal de Internet haciendo pasar la fuente de tráfico MMPP por una cola MMPP/D/1 para evaluar el comportamiento del canal de
-Internet frente a cambios en la capacidad dada por el proveedor de servicios. 
-Esto permite analizar la probabilidad de pérdida y tiempo de espera para buffer
-infifi nito y fifi nito cuando se hace variar la utilización del canal. 
-Además, se muestra la aplicación de este método sobre una red real y congestionada como lo es la RDUPBB.
+````{r echo=FALSE}
+y<-c(0,h$counts)
+x<-h$breaks
+plot(x,y,type="l",xlab="time (s)",ylab="Packets",main="Bellcore trace", ylim=c(0,500))
+````
+
+
+Calculando el ancho de banda efectivo, considerando los parámetros:
+
+Taza promedio de arribo $\{hat}mu = 1.591$
+Varianza de la taza de arribo $\{hat}theta^2 = 41.69$
+
+El flujo tiene una taza de servicio de C=2.9, un buffer de tamaño B=0.3 (300 Bytes).
+
+Calculando el punto crítico $\alpha(s,t)$
+
+````{r}
+C<-2.9
+B<-0.3
+u<-1.591
+t2<-41.69
+
+s<-(2*(C-u))/t2
+t<-B/(C-u)
+
+````
+
+
+
+
 
 
 

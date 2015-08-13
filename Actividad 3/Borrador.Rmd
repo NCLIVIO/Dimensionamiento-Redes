@@ -1,0 +1,8 @@
+---
+title: "Borrador"
+author: "Natalia Clivio"
+date: "Sunday, August 09, 2015"
+output: pdf_document
+---
+
+$$[\mu_l + \frac{(s\theta_l^2)}{2},\mu_u + \frac{(s\theta_u^2)}{2}]$$
