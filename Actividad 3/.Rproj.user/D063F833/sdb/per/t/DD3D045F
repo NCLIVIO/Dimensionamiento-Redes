@@ -1,12 +1,12 @@
 {
-    "contents" : "---\ntitle: \"Borrador\"\nauthor: \"Natalia Clivio\"\ndate: \"Sunday, August 09, 2015\"\noutput: pdf_document\n---\n\n$$[\\mu_l + \\frac{(s\\theta_l^2)}{2},\\mu_u + \\frac{(s\\theta_u^2)}{2}]$$\n",
+    "contents" : "---\ntitle: \"Borrador\"\nauthor: \"Natalia Clivio\"\ndate: \"Sunday, August 09, 2015\"\noutput: pdf_document\n---\n\n$$[\\mu_l + \\frac{(s\\theta_l^2)}{2},\\mu_u + \\frac{(s\\theta_u^2)}{2}]$$\n\n$$\\alpha(s,t)=\\lambda + \\frac{\\theta^2 t^{2H-1}}{2}s$$\n\nTaza promedio de arribo $\\hat{\\mu} = 35.09$\n",
     "created" : 1439144992278.000,
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "238157581",
+    "hash" : "2672191373",
     "id" : "DD3D045F",
-    "lastKnownWriteTime" : 1439165927,
+    "lastKnownWriteTime" : 1439514650,
     "path" : "~/GitHub/Dimensionamiento-Redes/Actividad 3/Borrador.Rmd",
     "project_path" : "Borrador.Rmd",
     "properties" : {

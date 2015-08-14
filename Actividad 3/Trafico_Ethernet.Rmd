@@ -19,8 +19,8 @@ Inicialmente se analizarán modelos sencillos como proceso de Poisson y movimien
 Calculando en ancho de banda efectivo para un flujo con movimiento browniano.
 Esta traza tiene una longitud de 512 con los siguientes prámetros:
 
-Taza promedio de arribo $\{hat}mu = 50.83$
-Varianza de la taza de arribo $\{hat}theta^2 = 30.18$
+Taza promedio de arribo $\hat{\mu} = 50.83$
+Varianza de la taza de arribo $\hat{\theta^2} = 30.18$
 
 El flujo tiene una taza de servicio de C=52, un buffer de tamaño B=5.
 
@@ -42,12 +42,13 @@ Bw_MB<-u+((s*t2)/2)
 Considerando el intervalo de confiaza para calcular el ancho de banda para un flujo con movimiento browniano, determinado por:
 
 $$[\mu_l + \frac{(s\theta_l^2)}{2},\mu_u + \frac{(s\theta_u^2)}{2}]$$
+
 El intervalo de confianza será:
 ````{r}
-ul<-
-t2l<-
-uh<-
-t2h<-
+ul<-50.83
+t2l<-30.18
+uh<-50.83
+t2h<-30.18
 LB<-ul+((s*t2l)/2)
 HB<-uh+((s*t2h)/2)
 ````
@@ -59,7 +60,7 @@ Considerando un flujo de longitud 512, con parámetros:
 
 Probabilidad del estado 1 al 2 $\mu = 0.4$
 Probabilidad del estado 2 al 1 $\lambda = 0.3$
-Trabajo que genera el estado 1 $\h=3.0$
+Trabajo que genera el estado 1 $h=3.0$
 
 El flujo tiene una taza de servicio de C=2, un buffer de tamaño B=15.
 
@@ -84,8 +85,8 @@ Bw_F<-(1/s)*log10(((exp(s*h))*pi1)+pi2)
 ###Movimiento fraccional browniano
 Esta traza corresponde a un modelo con dependencia de rango largo, numerosos estudios sugieren que este es el comportamiento de las redes modernas de tráfico. A continuación se calcula el ancho de banda efectivo de un movimiento fraccional browniano con parámetro Hurst H=0.75, y los siguientes parámetros:
 
-Taza promedio de arribo $\{hat}mu = 35.09$
-Varianza de la taza de arribo $\{hat}theta^2 = 25.53$
+Taza promedio de arribo $\hat{\mu} = 35.09$
+Varianza de la taza de arribo $\hat{\theta^2} = 25.53$
 
 El flujo tiene una taza de servicio de C=37, un buffer de tamaño B=5.
 
@@ -111,16 +112,16 @@ $$X[\tau,\tau+t]=\lambda t+Z(t)$$
  
 donde Z(t) corresponde al movimiento fraccional browniano con Var[Z(t)]=o^2*t^(2*H) para un parámetro de HURTS *H* entre 0 y 1, entonces: (Kelly(1996))
 
-$$\alpha(s,t)=\lambda + \frac{(\theta^2)(t^(2H-1)}{2}s$$
+$$\alpha(s,t)=\lambda + \frac{\theta^2 t^{(2H-1)}}{2}s$$
 
 A continuación se muestra la superficie del ancho de banda efectivo $\alpha(s,t)$ de un modelo con movimiento fraccional browniano, y con los parámetros:
 
 ```{r}
-o<-89.668 #theta (bytes per second)
-H<-0.81   # Hurts parameter, obtained by log variance time plot of the data
-l<-138.185  #lambda (bytes per second)
-t<-(seq(length=100, from=0.0001, to=10)) #time parameter (ms)
-s<-(seq(length=100, from=0.00001, to=0.01)) #space parameter
+o<-89.668   # theta (bytes per second)
+H<-0.81     # Hurts parameter, obtained by log variance time plot of the data
+l<-138.185  # lambda (bytes per second)
+t<-(seq(length=100, from=0.0001, to=10))    #time parameter (ms)
+s<-(seq(length=100, from=0.00001, to=0.01)) #space parameter (bytes^-1)
 
 ````
 
@@ -134,14 +135,33 @@ persp((t),(s),(z),theta=20,phi=-0,col = "lightblue", main="Ancho de Banda Efecti
       ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
 ````
 
+
 ````{r echo=FALSE}
 alpha<-log10(l+((((o^2)*(t^((2*H)-1)))/2)*s))
 ````
 
 
+##Traza 4:Proceso de Cola Pesada
+###$\alpha$-Stable Farima
+Este modelo se usa en el estudio de las redes modernas de tráfico,con tendencia a incrementos con colas pesadas y procesos de dependencia de rango largo.
 
-##Traza 4
-###Stable Farima
+Taza promedio de arribo $\hat{\mu} = 24.968$
+Varianza de la taza de arribo $\hat{\theta^2} = 4.058$
+
+El flujo tiene una taza de servicio de C=25, un buffer de tamaño B=4.
+
+Calculando el punto crítico $\alpha(s,t)$
+
+````{r}
+C<-25
+B<-4
+u<-24.968
+t2<-4.058
+
+s<-(2*(C-u))/t2 #0.0159
+t<-B/(C-u)      #124
+
+````
 
 
 ##Traza 5
@@ -174,8 +194,8 @@ plot(x,y,type="l",xlab="time (s)",ylab="Packets",main="Bellcore trace", ylim=c(0
 
 Calculando el ancho de banda efectivo, considerando los parámetros:
 
-Taza promedio de arribo $\{hat}mu = 1.591$
-Varianza de la taza de arribo $\{hat}theta^2 = 41.69$
+Taza promedio de arribo $\hat{\mu} = 1.591$
+Varianza de la taza de arribo $\hat{\theta^2} = 41.69$
 
 El flujo tiene una taza de servicio de C=2.9, un buffer de tamaño B=0.3 (300 Bytes).
 
@@ -191,7 +211,6 @@ s<-(2*(C-u))/t2
 t<-B/(C-u)
 
 ````
-
 
 
 

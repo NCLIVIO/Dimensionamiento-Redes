@@ -6,3 +6,7 @@ output: pdf_document
 ---
 
 $$[\mu_l + \frac{(s\theta_l^2)}{2},\mu_u + \frac{(s\theta_u^2)}{2}]$$
+
+$$\alpha(s,t)=\lambda + \frac{\theta^2 t^{2H-1}}{2}s$$
+
+Taza promedio de arribo $\hat{\mu} = 35.09$
