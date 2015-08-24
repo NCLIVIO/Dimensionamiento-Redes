@@ -30,31 +30,19 @@ Calculando el punto crítico $\alpha(s,t)$
 C<-52
 B<-5
 l<-50.83
-t2<-30.18
+var<-30.18
 u<-l
 
-s<-(2*(C-u))/t2
+s<-(2*(C-u))/var
 t<-B/(C-u)
 
-Bw_MB<-u+((s*t2)/2)
-````
+Bw_MB<-u+((s*var)/2)
+Bw_MB
 
-Considerando el intervalo de confiaza para calcular el ancho de banda para un flujo con movimiento browniano, determinado por:
-
-$$[\mu_l + \frac{(s\theta_l^2)}{2},\mu_u + \frac{(s\theta_u^2)}{2}]$$
-
-El intervalo de confianza será:
-````{r}
-ul<-50.83
-t2l<-30.18
-uh<-50.83
-t2h<-30.18
-LB<-ul+((s*t2l)/2)
-HB<-uh+((s*t2h)/2)
 ````
 
 
-##Traza 2
+##Traza 2: Fuentes de Video
 ###Fuente de fluido ON/OFF
 Considerando un flujo de longitud 512, con parámetros:
 
@@ -64,7 +52,7 @@ Trabajo que genera el estado 1 $h=3.0$
 
 El flujo tiene una taza de servicio de C=2, un buffer de tamaño B=15.
 
-Calculando el punto crítico $\alpha(s,t)$
+Calculando el punto crítico $\alpha(s,t)$, aplicando la ecuación de optimización inf sup.
 
 ````{r}
 C<-2
@@ -72,12 +60,92 @@ B<-15
 l<-0.3
 u<-0.4
 h<-3.0
-
-s<-(2*(C-u))/t2
 pi1<-l/(l+u)
 pi2<-u/(l+u)
+t<-2
+
+I<-inf(ti)
+sup(S)S*(B+(C*ti))-(ti*log10(((exp(S*h))*pi1)+pi2))
+#s<-0.7 ti<-28
+s<-(2*(C-u))/t2 
+
+
+s*(B+(C*ti))-(ti*log10(((exp(s*h))*pi1)+pi2))
 
 Bw_F<-(1/s)*log10(((exp(s*h))*pi1)+pi2)
+Bw_F
+
+f <- function(S,t1) S*(B+(C*t1))-(t1*log10(((exp(S*h))*pi1)+pi2))
+space<-seq(length=30, from=0.1, to=10)
+time<-seq(length=30, from=0.1, to=30) #ms
+S<-space
+t1<-time
+
+z <- outer(S,t1,f)
+persp(S,t1,z,phi=10,theta=-40,col="yellow",shade=.00000001,ticktype="detailed")
+
+
+
+
+optim( c(0,0), f )$par
+
+f <- function(x) (1-x[1])^2 + 100*(x[2]-x[1]^2)^2
+optim( c(0,0), f )$par
+optim( c(0,0), f )$value
+
+f <- function(x1,y1) (1-x1)^2 + 100*(y1 - x1^2)^2
+x <- seq(-2,2,by=.15)
+y <- seq(-1,3,by=.15)
+z <- outer(x,y,f)
+persp(x,y,z,phi=45,theta=-45,col="yellow",shade=.00000001,ticktype="detailed")
+
+
+Bw_F<-(1/s)*log10(((exp(s*h))*pi1)+pi2)
+
+#Trazas de largo T muestras, con la siguiente matriz Q
+#Estado 0 off
+#Estado h on
+space<-seq(length=30, from=0.1, to=100)
+time<-seq(length=30, from=0.1, to=40) #ms
+s<-space
+t<-time
+
+l<-0.024  #Cantidad de transiciones del estado 0 al h por unidad de t
+u<-0.076  #Cantidad de transiciones que salen de 0 por unidad de t
+h<-0.01
+
+#Distribución invariante es un vector de probabilidad pi tal que piQ=0, entonces:
+pi1<-l/(l+u)
+pi2<-u/(l+u) 
+pi<-matrix(c(pi1,0,pi2,0),2,2)
+Q<-matrix(c(-l,u,l,-u),2,2)
+H<-matrix(c(0,0,0,h),2,2)
+V<-matrix(1,2,2)
+
+Bw_OnOff<-(1/(s*t))*log10(pi*exp((Q+H)*1)*V)
+p<-log10(pi*exp((Q+H)*1)*V)
+
+
+z<-outer(s,t,Bw_OnOff)     # La función outer evalua la función Bw en cada punto(si,tj)
+persp(s,t,z)                    # Un gráfico en perspectiva
+persp(s,t,z,theta=40,phi=0,col = "lightblue", main="Ancho de Banda Efectivo",ticktype = "detailed",xlab="s",ylab="time (ms)",zlab="(s,t)")  
+
+
+
+
+space<-seq(length=30, from=0.1, to=1)
+time<-seq(length=30, from=0.1, to=2) #ms
+s<-space
+t<-time
+m<-1
+h<-3
+
+# Definimos la función que dibujaremos
+Bw<-function(s,t) {(1/(s*t))*log10(1+((m/h)*(exp(s*h*t)-1)))}   
+z<-outer(s,t,Bw)     # La función outer evalua la función Bw en cada punto(si,tj)
+persp(s,t,z)                    # Un gráfico en perspectiva
+persp(s,t,z,theta=40,phi=0,col = "lightblue", main="Ancho de Banda Efectivo",ticktype = "detailed",xlab="s",ylab="time (ms)",zlab="(s,t)")  
+
 ````
 
 
@@ -93,6 +161,14 @@ El flujo tiene una taza de servicio de C=37, un buffer de tamaño B=5.
 Calculando el punto crítico $\alpha(s,t)$
 
 ````{r}
+#Generate a time series of fractional Brownian motion.
+fbm(hurst = 0.7, n = 100)
+fbm()
+plot(fbm())
+d <- fbm(hurst=0.81, n=1000000)
+plot(d)
+
+
 C<-37
 B<-5
 u<-35.09
@@ -105,40 +181,6 @@ t<-(B/(C-u))*(H/(1-H))      #8
 Bw_MFB<-u+(((s*t2)/2)*(t^(2*H-1)))
 ````
 
-Parte 2
-Teniendo en cuenta las características autosimilares de esta traza de tráfico y que siga un modelo de movimiento fraccional browniano,  entonces se puede suponer para el modelo una llegada de los datos en intervalos de tiempo t dada por:
-
-$$X[\tau,\tau+t]=\lambda t+Z(t)$$
- 
-donde Z(t) corresponde al movimiento fraccional browniano con Var[Z(t)]=o^2*t^(2*H) para un parámetro de HURTS *H* entre 0 y 1, entonces: (Kelly(1996))
-
-$$\alpha(s,t)=\lambda + \frac{\theta^2 t^{(2H-1)}}{2}s$$
-
-A continuación se muestra la superficie del ancho de banda efectivo $\alpha(s,t)$ de un modelo con movimiento fraccional browniano, y con los parámetros:
-
-```{r}
-o<-89.668   # theta (bytes per second)
-H<-0.81     # Hurts parameter, obtained by log variance time plot of the data
-l<-138.185  # lambda (bytes per second)
-t<-(seq(length=100, from=0.0001, to=10))    #time parameter (ms)
-s<-(seq(length=100, from=0.00001, to=0.01)) #space parameter (bytes^-1)
-
-````
-
-Los ejes tienen escala logarítmica (base 10) con s en unidades de $bytes^-1$, t en segundos y $\alpha(s,t)$ en bytes por segundo.
-
-````{r}
-Bw<-function(s,t) {log10(l+((((o^2)*(t^((2*H)-1)))/2)*s))}   
-z<-outer(t,s,Bw) # La función outer evalua la función Bw en cada punto(si,tj)
-
-persp((t),(s),(z),theta=20,phi=-0,col = "lightblue", main="Ancho de Banda Efectivo",
-      ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
-````
-
-
-````{r echo=FALSE}
-alpha<-log10(l+((((o^2)*(t^((2*H)-1)))/2)*s))
-````
 
 
 ##Traza 4:Proceso de Cola Pesada
@@ -182,20 +224,20 @@ vector<-dataset$Seconds
 last=tail(vector,n=1)
 unit_time=0.5
 step=last/unit_time
-h<-hist(vector,breaks=step)              
+h_data<-hist(vector,breaks=step)              
 ````
 
 ````{r echo=FALSE}
-y<-c(0,h$counts)
-x<-h$breaks
-plot(x,y,type="l",xlab="time (s)",ylab="Packets",main="Bellcore trace", ylim=c(0,500))
+belly<-c(0,h_data$counts)
+bellx<-h_data$breaks
+plot(bellx,belly,type="l",xlab="time (s)",ylab="Packets",main="Bellcore trace", ylim=c(0,500))
 ````
 
 
 Calculando el ancho de banda efectivo, considerando los parámetros:
 
 Taza promedio de arribo $\hat{\mu} = 1.591$
-Varianza de la taza de arribo $\hat{\theta^2} = 41.69$
+Varianza de la taza de arribo $\hat{\theta^2} = 4.169$
 
 El flujo tiene una taza de servicio de C=2.9, un buffer de tamaño B=0.3 (300 Bytes).
 
@@ -205,15 +247,148 @@ Calculando el punto crítico $\alpha(s,t)$
 C<-2.9
 B<-0.3
 u<-1.591
-t2<-41.69
+t2<-4.169
 
 s<-(2*(C-u))/t2
 t<-B/(C-u)
 
 ````
 
+````{r}
+#De 512 datos X=255.5
+lam<-1.591
+lam<-2.498
+var<-4.169
+n<-512
+int<-0.95
+z<-1.96
+z-0.231
+
+intl<-lam-((var/sqrt(n))*z)
+inth<-lam+((var/sqrt(n))*z)
+````
+
+Moving Blocks bootstrap estimator
+
+`````{r}
+x<-c(13, 11.5, 13.5, 14, 10, 9, 15, 14.5, 8, 9.5, 9, 10)
+y<-c(0.707, 1.0,0.707, 0.0, -0.707, -1.0, -0.707, 0.0, 0.707, 1.0, 0.707, 0.0, -0.707, -1.0, -0.707, 0.0)
+
+suy<-c(0.577,0.985, 0.816, 0.169, -0.577, -0.985, -0.816, -0.169, 0.577, 0.985,
+       0.816, 0.169, -0.577, -0.985,-0.816, -0.169)
+
+surr <- surrogate(beamchaos, method="ce")
+## print the result
+print(surr)
+plot(surr, type="time")
+plot(surr, type="sdf")
+plot(surr, type="lag")
+plot(surr, type="pdf")
+## create comparison time history
+plot(surr, show="both", type="time")
+summary(surr)
+
+s<-surrogate(x, method="ce")
+
+sy<-surrogate(y, method="phase")
+summary(sy)
+plot(sy, type="pdf")
+
+data_Bell<-head(bellx,1000)
+surr <- surrogate(data_Bell, method="phase")
+summary(surr)
+plot(surr, type="time")
+plot(surr, type="sdf")
+plot(surr, type="lag")
+plot(surr, type="pdf")
+plot(surr, show="both", type="time")
 
 
 
+lam<-41.5
+var<-0.3
+n<-10
+int<-0.95
+z<-1.96
 
+intl<-lam-((var/sqrt(n))*z)
+inth<-lam+((var/sqrt(n))*z)
+
+#BM
+lam<-50.83
+var<-30.18
+n<-512
+int<-0.95
+z<-1.96
+intl<-lam-((var/sqrt(n))*z)
+inth<-lam+((var/sqrt(n))*z)
+intl
+inth
+
+````
+
+Parte 2 MFB
+Teniendo en cuenta las características autosimilares de esta traza de tráfico y que siga un modelo de movimiento fraccional browniano,  entonces se puede suponer para el modelo una llegada de los datos en intervalos de tiempo t dada por:
+
+$$X[\tau,\tau+t]=\lambda t+Z(t)$$
+ 
+donde Z(t) corresponde al movimiento fraccional browniano con Var[Z(t)]=o^2*t^(2*H) para un parámetro de HURTS *H* entre 0 y 1, entonces: (Kelly(1996))
+
+$$\alpha(s,t)=\lambda + \frac{\theta^2 t^{(2H-1)}}{2}s$$
+
+A continuación se muestra la superficie del ancho de banda efectivo $\alpha(s,t)$ de un modelo con movimiento fraccional browniano, y con los parámetros:
+
+```{r}
+o<-89.668   # theta (bytes per second)
+H<-0.81     # Hurts parameter, obtained by log variance time plot of the data
+l<-138.185  # lambda (bytes per second)
+t<-(seq(length=100, from=0.0001, to=10))    #time parameter (ms)
+s<-(seq(length=100, from=0.00001, to=0.01)) #space parameter (bytes^-1)
+
+````
+
+Los ejes tienen escala logarítmica (base 10) con s en unidades de $bytes^-1$, t en segundos y $\alpha(s,t)$ en bytes por segundo.
+
+````{r}
+Bw<-function(s,t) {log10(l+((((o^2)*(t^((2*H)-1)))/2)*s))}   
+z<-outer(t,s,Bw) # La función outer evalua la función Bw en cada punto(si,tj)
+
+persp((t),(s),(z),theta=20,phi=-0,col = "lightblue", main="Ancho de Banda Efectivo",
+      ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
+````
+
+
+````{r echo=FALSE}
+alpha<-log10(l+((((o^2)*(t^((2*H)-1)))/2)*s))
+````
+
+Considerando el intervalo de confiaza para calcular el ancho de banda para un flujo con movimiento browniano, determinado por:
+
+$$[\mu_l + \frac{(s\theta_l^2)}{2},\mu_u + \frac{(s\theta_u^2)}{2}]$$
+
+El intervalo de confianza será:
+````{r}
+ul<-50.33
+varl<-30
+uh<-50.83
+varh<-30.18
+LB<-ul+((s*varl)/2)
+LB
+HB<-uh+((s*varh)/2)
+HB
+
+````
+
+
+````{r}
+library(somebm)
+bm(x0 = 0, t0 = 0, t = 1, n = 512) #Generate a time series of Brownian motion.
+
+bm()
+plot(bm())
+a <- bm(x0=1, t0=1, t=500, n=1000)
+plot(a)
+summary(a)
+
+````
 
