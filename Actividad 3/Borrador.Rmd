@@ -8,10 +8,14 @@ output: pdf_document
 
 Calculando el punto crítico $\boldsymbol{\alpha(s,t)}$, que está determinado:
 
-Calculando el punto crítico *$\alpha(s,t)$*, que está determinado:
-
-Calculando el punto crítico $*\alpha(s,t)*$, que está determinado:
-
-
 $\boldsymbol{\alpha(s,t)=\mu + \frac{(s\theta^2)}{2}}$
 
+
+$$ Q = \begin{pmatrix} -\lambda & \lambda \\ \mu & -\mu\end{pmatrix}$$
+
+
+$\pi =(\frac{\mu}{\lambda + \mu};\frac{\lambda}{\lambda + \mu})$
+
+$\boldsymbol{\alpha(s,t)=log\{ \vec{\pi} exp[(Q + Hs) t] \vec{1} \}}$
+
+$\alpha(s,t)=log\{ (\frac{\mu}{\lambda + \mu};\frac{\lambda}{\lambda + \mu}) exp[\begin{pmatrix} -\lambda & \lambda \\ \mu & -\mu + hs\end{pmatrix} t] \vec{1} \}$

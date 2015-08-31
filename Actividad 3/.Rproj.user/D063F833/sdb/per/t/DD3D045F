@@ -1,12 +1,12 @@
 {
-    "contents" : "---\ntitle: \"Borrador\"\nauthor: \"Natalia Clivio\"\ndate: \"Sunday, August 09, 2015\"\noutput: pdf_document\n---\n\n\nCalculando el punto crítico $\\boldsymbol{\\alpha(s,t)}$, que está determinado:\n\nCalculando el punto crítico *$\\alpha(s,t)$*, que está determinado:\n\nCalculando el punto crítico $*\\alpha(s,t)*$, que está determinado:\n\n\n$\\boldsymbol{\\alpha(s,t)=\\mu + \\frac{(s\\theta^2)}{2}}$\n\n",
+    "contents" : "---\ntitle: \"Borrador\"\nauthor: \"Natalia Clivio\"\ndate: \"Sunday, August 09, 2015\"\noutput: pdf_document\n---\n\n\nCalculando el punto crítico $\\boldsymbol{\\alpha(s,t)}$, que está determinado:\n\n$\\boldsymbol{\\alpha(s,t)=\\mu + \\frac{(s\\theta^2)}{2}}$\n\n\n$$ Q = \\begin{pmatrix} -\\lambda & \\lambda \\\\ \\mu & -\\mu\\end{pmatrix}$$\n\n\n$\\pi =(\\frac{\\mu}{\\lambda + \\mu};\\frac{\\lambda}{\\lambda + \\mu})$\n\n$\\boldsymbol{\\alpha(s,t)=log\\{ \\vec{\\pi} exp[(Q + Hs) t] \\vec{1} \\}}$\n\n$\\alpha(s,t)=log\\{ (\\frac{\\mu}{\\lambda + \\mu};\\frac{\\lambda}{\\lambda + \\mu}) exp[\\begin{pmatrix} -\\lambda & \\lambda \\\\ \\mu & -\\mu + hs\\end{pmatrix} t] \\vec{1} \\}$\n",
     "created" : 1439144992278.000,
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "2178389989",
+    "hash" : "436954644",
     "id" : "DD3D045F",
-    "lastKnownWriteTime" : 1440370416,
+    "lastKnownWriteTime" : 1440951747,
     "path" : "~/GitHub/Dimensionamiento-Redes/Actividad 3/Borrador.Rmd",
     "project_path" : "Borrador.Rmd",
     "properties" : {

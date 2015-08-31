@@ -6,23 +6,59 @@ header-includes:
   - \usepackage{dcolumn}
 output: pdf_document
 ---
-El ancho de banda efectivo es una medida usada en el dimensionamiento y planeamiento de redes de comunicaciones modernas. 
-
-El objetivo de este análisis, es estimar el ancho de banda efectivo para distintos flujos de tráfico generados y la traza conocida de Bellcore.
+El ancho de banda efectivo es una medida usada en el dimensionamiento y planeamiento de redes de comunicaciones modernas. El objetivo de este análisis, es estimar el ancho de banda efectivo para distintos modelos de tráfico y compararlo con la traza conocida como la de Bellcore y ver que modelo se ajusta al comportamiento de la traza.
 
 En cuanto a su estimación hay dos enfoques, el paramétrico y el no paramétrico. En el enfoque paramétrico se asume un modelo de la fuente de tráfico y a partir de las trazas se estima un conjunto de parámetros de dicho modelo. De esa forma se obtiene un estimador del ancho de banda efectivo y además es posible calcular su intervalo de confianza. En el enfoque no paramétrico, no se asume un modelo específico del tráfico y se procura construir un estimador del ancho de banda efectivo calculando el valor esperado que aparece en la función generatriz de momentos a través de promedios temporales en la traza.
 
-Inicialmente se analizarán modelos sencillos como el movimiento browniano, seguido de Fluido de Markov ON/OFF, movimiento fraccional browniano y modelo de FARIMA. Estos modelos presentan una variadad de características observadas en muchas formas en el tráfico real.
+El presente análisis, se realiza con un enfoque paramétrico donde se trabaja con la traza conocida de Bellcore, modelos sencillos como el movimiento browniano, seguido de Fluido de Markov ON/OFF, movimiento fraccional browniano y modelo de FARIMA ya que estos modelos presentan una variadad de características observadas en muchas formas en el tráfico real.
+
+
+##Traza de Tráfico Real
+####Traza Bellcore
+Esta traza de tráfico de BELLCORE labs, esta traza contiene 1000000 de paquetes y se encuentran en dos columnas, en formato ASCII, veinte bytes por línea. La primera línea muestra el tiempo en segundos desde el comienzo de la traza. La segunda columna muestra el tamaño del paquete en bytes, incluyendo parte del encabezado y el código de redundancia cíclica (CRC), tener encuenta que que con el protocolo Ethernet los paquetes poseen un tamaño mínimo de 64 bytes y un máximo de 1.518 bytes.
+
+```{r echo=FALSE, fig.show='hide'}
+packets<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/Bellcore/BC-pAug89.csv",
+                  header=TRUE,sep=";",na.strings="NA",dec=".")
+
+dataset<-data.frame(Seconds=packets$Seconds,Bytes=packets$Bytes)
+
+vector<-dataset$Seconds
+last=tail(vector,n=1)
+unit_time=0.5
+step=last/unit_time
+h_data<-hist(vector,breaks=step)              
+````
+
+La traza Bc-pAug89 comienza a las 11:25 el 29 de agosto de 1989, capturó datos alrededor de 3.142,82 s (aproximadamente 1.000.000 paquetes fueron capturados).
+
+````{r echo=FALSE}
+belly<-c(0,h_data$counts)
+bellx<-h_data$breaks
+plot(bellx,belly,type="l",xlab="time (s)",ylab="Packets",main="Bellcore trace", ylim=c(0,500))
+````
+
+Para este análisis se considera una muestra de los primeros 512 segundos que corresponden a 1025 bytes por segundo
+
+````{r echo=FALSE, warning=FALSE}
+library(quantmod)
+set_belly<-head(belly,1025)
+set_bellx<-head(bellx,1025)
+
+plot(set_bellx,set_belly,type="l",xlab="time (ms)",ylab="Packets",main="Muestra Bellcore trace", ylim=c(0,500))
+abline(v=NULL,h=400,lty=3,col="green")
+abline(v=NULL,h=35,lty=3,col="green")
+````
+
 
 ##Procesos de Renovación: Modelos con Incrementos Independientes
 ####Flujo con Movimiento Browniano
 
 El movimiento browniano se ha utilizado como un caso limitado del tráfico pesado y también proporciona un inicio al análisis para el tráfico de movimiento browniano fraccional tratado más adelante.[1]
 
-
 ````{r echo=FALSE, warning=FALSE}
 library(somebm)
-bmdata <- bm(x0=1, t0=1, t=2, n=1000)
+bmdata <- bm(x0=1, t0=0.01, t=2, n=1000)
 plot(bmdata, xlab="time (s)",ylab="Packets",main="Brownian motion trace")
 ````
 
@@ -34,7 +70,6 @@ Varianza de la taza de arribo $\hat{\theta^2} = 30.18$
 
 
 El flujo tiene una taza de servicio de C=52, un buffer de tamaño B=5.
-
 
 Calculando el punto crítico $\boldsymbol{\alpha(s,t)}$, que está determinado [1]:
 
@@ -58,6 +93,85 @@ Bw_MB
 
 ##Modelos dependientes con rango corto (SRD)
 ####Flujo de markov discreto ON/OFF
+
+Se supone un conjunto de fuentes que alternan periodos on/off y que exhiben el efecto "Noah" (síndrome de varianza infinita). El periodo ON es aquel en el se transmite información a velocidad constante y el periodo OFF corresponde al tiempo entre transmisiones. Este el flujo de tráfico agregado no presenta cor-
+relación a largo plazo.
+
+Si el flujo Markoviano modulado por una cadena de Markov con dos estados 0 (OFF) y h (ON). Mientras la cadena está en el estado h se produce trabajo a tasa constante h, mientras está en el estado 0 no se produce trabajo.
+El generador infinitesimal de la cadena es[4]:
+
+$$ Q = \begin{pmatrix} -\lambda & \lambda \\ \mu & -\mu\end{pmatrix}$$
+$$ H = \begin{pmatrix} 0 & 0 \\ 0 & h\end{pmatrix}$$
+
+donde $\lambda$¸ se interpretaba como la cantidad de transiciones del estado 0 al estado h por unidad de tiempo y $\mu$ como la cantidad de transiciones que salen de 0 por unidad de tiempo. La distribución invariante de la cadena es un vector de probabilidad $\pi$ tal que $\pi Q =\vec{0}$ , entonces:
+
+$$\pi =(\frac{\mu}{\lambda + \mu};\frac{\lambda}{\lambda + \mu})$$
+
+Tomando como distribución inicial de la cadena la distribución invariante, el ancho de banda efectivo que resulta es:
+
+$$\boldsymbol{\alpha(s,t)=log\{ \vec{\pi} exp[(Q + Hs) t] \vec{1} \}}$$
+
+Reemplazando, se obtiene:
+
+$\alpha(s,t)=log\{ (\frac{\mu}{\lambda + \mu};\frac{\lambda}{\lambda + \mu}) exp[\begin{pmatrix} -\lambda & \lambda \\ \mu & -\mu + hs\end{pmatrix} t] \vec{1} \}$
+
+Para simular es fluo, se considera:
+$\lambda = \mu= 0.01, h= 0.01 y n= 10000.$
+
+Aplicando un estimador markoviano EMV, los valores obtenidos son:
+
+
+Calculando el punto crítico $\alpha(s,t)$:
+
+````{r}
+l<-0.01
+u<-0.01
+h<-0.01
+Q<-matrix(c(-l,u,l,-u),2,2)
+H<-matrix(c(0,0,0,h),2,2)
+V<-matrix(1,2,2)
+
+#Distribución invariante es un vector de probabilidad pi tal que piQ=0, entonces:
+pi1<-l/(l+u)
+pi2<-u/(l+u)
+
+space<-seq(length=30, from=0.01, to=2)
+time<-seq(length=30, from=0.01, to=2) #ms
+s<-(space)
+t<-(time)
+
+Bw<-function(s,t) {(1/s)*log10(pi2+(exp((h*s))*pi1))}   
+z<-outer(s,t,Bw)     # La función outer evalua la función Bw en cada punto(si,tj)
+persp(s,t,z,theta=30,phi=0,col = "red", 
+      main="Ancho de banda efectivo de una fuente ON/OFF",
+      ticktype = "detailed",xlab="s",ylab="time (ms)",zlab="(s,t)")  
+````
+
+
+```{r}
+#Estimación
+l<-0.01012
+u<-0.01034
+h<-0.01
+Qn<-matrix(c(-l,u,l,-u),2,2)
+Qn
+
+pi1<-l/(l+u)
+pi2<-u/(l+u)
+
+space<-seq(length=30, from=0.01, to=2)
+time<-seq(length=30, from=0.01, to=2) #ms
+s<-(space)
+t<-(time)
+
+Bw<-function(s,t) {(1/s)*log10(pi2+(exp((h*s))*pi1))}   
+z<-outer(s,t,Bw)     # La función outer evalua la función Bw en cada punto(si,tj)
+persp(s,t,z,theta=30,phi=0,col = "green", 
+      sub="Ancho de banda efectivo de una fuente ON/OFF",
+      ticktype = "detailed",xlab="s",ylab="time (ms)",zlab="(s,t)")  
+
+````
+
 
 ##Modelos dependientes con rango largo (LRD)
 ####Movimiento fraccional browniano
@@ -134,6 +248,8 @@ persp((t),(s),(z),theta=20,phi=-0,col = "lightblue", main="Ancho de Banda Efecti
 
 
 ##Procesos de Colas pesadas, autosimilares y LRD.
+####$\alpha$-Stable Farima
+Este modelo se usa en el estudio de las redes modernas de tráfico,con tendencia a incrementos con colas pesadas y procesos de dependencia de rango largo.
 
 
 
@@ -144,3 +260,6 @@ persp((t),(s),(z),theta=20,phi=-0,col = "lightblue", main="Ancho de Banda Efecti
 [2]García, Contribución al Desarrollo de Herramientas Estratégicas para el Diseño,Dimensionado y Evaluación de Redes de Telecomunicación de Banda Ancha. 2009
 
 [3]Gibbens, Traffic characterisation and effective bandwidths for broadband network traces.
+
+[4]Bermolen Paola, Ancho de Banda Efectivo para flujos markovianos.2003
+

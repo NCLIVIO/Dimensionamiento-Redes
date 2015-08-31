@@ -66,7 +66,7 @@ t<-2
 
 I<-inf(ti)
 sup(S)S*(B+(C*ti))-(ti*log10(((exp(S*h))*pi1)+pi2))
-#s<-0.7 ti<-28
+#s<-0.7 ti<-28 BW<-2.006
 s<-(2*(C-u))/t2 
 
 
