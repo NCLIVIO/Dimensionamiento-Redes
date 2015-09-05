@@ -1,12 +1,12 @@
 {
-    "contents" : "---\ntitle: \"Borrador\"\nauthor: \"Natalia Clivio\"\ndate: \"Sunday, August 09, 2015\"\noutput: pdf_document\n---\n\n\nCalculando el punto crítico $\\boldsymbol{\\alpha(s,t)}$, que está determinado:\n\n$\\boldsymbol{\\alpha(s,t)=\\mu + \\frac{(s\\theta^2)}{2}}$\n\n\n$$ Q = \\begin{pmatrix} -\\lambda & \\lambda \\\\ \\mu & -\\mu\\end{pmatrix}$$\n\n\n$\\pi =(\\frac{\\mu}{\\lambda + \\mu};\\frac{\\lambda}{\\lambda + \\mu})$\n\n$\\boldsymbol{\\alpha(s,t)=log\\{ \\vec{\\pi} exp[(Q + Hs) t] \\vec{1} \\}}$\n\n$\\alpha(s,t)=log\\{ (\\frac{\\mu}{\\lambda + \\mu};\\frac{\\lambda}{\\lambda + \\mu}) exp[\\begin{pmatrix} -\\lambda & \\lambda \\\\ \\mu & -\\mu + hs\\end{pmatrix} t] \\vec{1} \\}$\n",
+    "contents" : "---\ntitle: \"Borrador\"\nauthor: \"Natalia Clivio\"\ndate: \"Sunday, August 09, 2015\"\noutput: pdf_document\n---\n\n\nCalculando el punto crítico $\\boldsymbol{\\alpha(s,t)}$, que está determinado:\n\n$\\boldsymbol{\\alpha(s,t)=\\mu + \\frac{(s\\theta^2)}{2}}$\n\n\n$$ Q = \\begin{pmatrix} -\\lambda & \\lambda \\\\ \\mu & -\\mu\\end{pmatrix}$$\n\n\n$\\pi =(\\frac{\\mu}{\\lambda + \\mu};\\frac{\\lambda}{\\lambda + \\mu})$\n\n$\\boldsymbol{\\alpha(s,t)=log\\{ \\vec{\\pi} exp[(Q + Hs) t] \\vec{1} \\}}$\n\n$\\alpha(s,t)=log\\{ (\\frac{\\mu}{\\lambda + \\mu};\\frac{\\lambda}{\\lambda + \\mu}) exp[\\begin{pmatrix} -\\lambda & \\lambda \\\\ \\mu & -\\mu + hs\\end{pmatrix} t] \\vec{1} \\}$\n`````{r warning=FALSE}\nlibrary(rgl)\nl<-0.4\nu<-0.3\nh<-0.1\nQ<-matrix(c(-l,u,l,-u),2,2)\nH<-matrix(c(0,0,0,h),2,2)\nV<-matrix(1,2,2)\n\n#Distribución invariante es un vector de probabilidad pi tal que piQ=0, entonces:\npi1<-l/(l+u)\npi2<-u/(l+u)\n\nspace<-seq(length=50, from=1, to=100)\ntime<-seq(length=50, from=1, to=30) #ms\ns<-(space)\nt<-(time)\n\nBw<-function(t,s) {(1/s)*log10(pi2+(exp((h*s))*pi1))}   \nz<-outer(t,s,Bw)     # La función outer evalua la función Bw en cada punto(si,tj)\n\nnrz<-nrow(z)\nncz<-ncol(z)\n\n# Create a function interpolating colors in the range of specified colors\njet.colors<-colorRampPalette(c(\"blue\",\"violet\"))\n\n# Generate the desired number of colors from this palette\nnbcol<-100\ncolor<-jet.colors(nbcol)\n# Compute the z-value at the facet centres\nzfacet<-z[−1,−1]+z[−1,−ncz]+z[−nrz,−1] +z[−nrz,−ncz]\n\n# Recode facet z-values into color indices\nfacetcol<-cut(zfacet,nbcol)\n\npersp(t,s,z,theta=-30,phi=0,col = color[facetcol],front=\"lines\", \n      sub=\"Ancho de banda efectivo de una fuente ON/OFF\",\n      ticktype = \"detailed\",xlab=\"time (ms)\",ylab=\"space (s)\",zlab=\"(s,t)\")  \n      \n````\n",
     "created" : 1439144992278.000,
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "436954644",
+    "hash" : "2409902022",
     "id" : "DD3D045F",
-    "lastKnownWriteTime" : 1440951747,
+    "lastKnownWriteTime" : 1441420613,
     "path" : "~/GitHub/Dimensionamiento-Redes/Actividad 3/Borrador.Rmd",
     "project_path" : "Borrador.Rmd",
     "properties" : {

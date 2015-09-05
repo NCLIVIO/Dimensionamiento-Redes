@@ -98,12 +98,12 @@ Se supone un conjunto de fuentes que alternan periodos on/off y que exhiben el e
 relación a largo plazo.
 
 Si el flujo Markoviano modulado por una cadena de Markov con dos estados 0 (OFF) y h (ON). Mientras la cadena está en el estado h se produce trabajo a tasa constante h, mientras está en el estado 0 no se produce trabajo.
-El generador infinitesimal de la cadena es[4]:
+El generador infinitesimal de la cadena es la matriz Q y H es una matriz diagonal con elementos hi en la diagonal[4]:
 
 $$ Q = \begin{pmatrix} -\lambda & \lambda \\ \mu & -\mu\end{pmatrix}$$
 $$ H = \begin{pmatrix} 0 & 0 \\ 0 & h\end{pmatrix}$$
 
-donde $\lambda$¸ se interpretaba como la cantidad de transiciones del estado 0 al estado h por unidad de tiempo y $\mu$ como la cantidad de transiciones que salen de 0 por unidad de tiempo. La distribución invariante de la cadena es un vector de probabilidad $\pi$ tal que $\pi Q =\vec{0}$ , entonces:
+donde $\lambda$¸ se interpretaba como la cantidad de transiciones del estado 0 al estado h por unidad de tiempo y $\mu$ como la cantidad de transiciones que salen de 0 por unidad de tiempo. $vec{\pi}$ es la distribución estacionaria de la cadena, este es un vector de probabilidad $\pi$ tal que $\pi Q =\vec{0}$ , la distribución invariante de la cadena es:
 
 $$\pi =(\frac{\mu}{\lambda + \mu};\frac{\lambda}{\lambda + \mu})$$
 
@@ -124,53 +124,50 @@ Aplicando un estimador markoviano EMV, los valores obtenidos son:
 Calculando el punto crítico $\alpha(s,t)$:
 
 ````{r}
-l<-0.01
-u<-0.01
-h<-0.01
+library(rgl)
+
+l<-0.4
+u<-0.3
+h<-0.1
 Q<-matrix(c(-l,u,l,-u),2,2)
 H<-matrix(c(0,0,0,h),2,2)
 V<-matrix(1,2,2)
-
+Q
+H
+````
+````{r}
 #Distribución invariante es un vector de probabilidad pi tal que piQ=0, entonces:
 pi1<-l/(l+u)
 pi2<-u/(l+u)
 
-space<-seq(length=30, from=0.01, to=2)
-time<-seq(length=30, from=0.01, to=2) #ms
+space<-seq(length=50, from=1, to=100)
+time<-seq(length=50, from=1, to=30) #ms
 s<-(space)
 t<-(time)
 
-Bw<-function(s,t) {(1/s)*log10(pi2+(exp((h*s))*pi1))}   
-z<-outer(s,t,Bw)     # La función outer evalua la función Bw en cada punto(si,tj)
-persp(s,t,z,theta=30,phi=0,col = "red", 
-      main="Ancho de banda efectivo de una fuente ON/OFF",
-      ticktype = "detailed",xlab="s",ylab="time (ms)",zlab="(s,t)")  
-````
+Bw<-function(t,s) {(1/s)*log10(pi2+(exp((h*s))*pi1))}   
+z<-outer(t,s,Bw)     # La función outer evalua la función Bw en cada punto(si,tj)
 
+nrz<-nrow(z)
+ncz<-ncol(z)
 
-```{r}
-#Estimación
-l<-0.01012
-u<-0.01034
-h<-0.01
-Qn<-matrix(c(-l,u,l,-u),2,2)
-Qn
+# Create a function interpolating colors in the range of specified colors
+jet.colors<-colorRampPalette(c("blue","violet"))
 
-pi1<-l/(l+u)
-pi2<-u/(l+u)
+# Generate the desired number of colors from this palette
+nbcol<-100
+color<-jet.colors(nbcol)
+# Compute the z-value at the facet centres
+zfacet<-z[−1,−1]+z[−1,−ncz]+z[−nrz,−1] +z[−nrz,−ncz]
 
-space<-seq(length=30, from=0.01, to=2)
-time<-seq(length=30, from=0.01, to=2) #ms
-s<-(space)
-t<-(time)
+# Recode facet z-values into color indices
+facetcol<-cut(zfacet,nbcol)
 
-Bw<-function(s,t) {(1/s)*log10(pi2+(exp((h*s))*pi1))}   
-z<-outer(s,t,Bw)     # La función outer evalua la función Bw en cada punto(si,tj)
-persp(s,t,z,theta=30,phi=0,col = "green", 
+persp(t,s,z,theta=-30,phi=0,col = color[facetcol],front="lines", 
       sub="Ancho de banda efectivo de una fuente ON/OFF",
-      ticktype = "detailed",xlab="s",ylab="time (ms)",zlab="(s,t)")  
-
+      ticktype = "detailed",xlab="time (ms)",ylab="space (s)",zlab="(s,t)")  
 ````
+
 
 
 ##Modelos dependientes con rango largo (LRD)
@@ -202,24 +199,8 @@ Varianza de la taza de arribo $\hat{\theta^2} = 25.53$
 
 El flujo tiene una taza de servicio de C=37, un buffer de tamaño B=5.
 
-Calculando el punto crítico $\boldsymbol{\alpha(s,t)}$
 
-````{r}
-#Ejemplo 1
-#Cálculo analítico del ancho de banda efectivo de la traza
-C<-37
-B<-5
-u<-35.09
-var<-25.53
-H<-0.75
-
-s<-(B+(C+u)*t)/(var*t^(2*H)) #0.0355
-t<-(B/(C-u))*(H/(1-H))      #8
-
-Bw_MFB<-u+(((s*var)/2)*(t^(2*H-1)))
-Bw_MFB
-````
-
+Calculando el ancho de banda efectivo, se obtiene:
 
 ````{r}
 #Ejemplo 2
@@ -235,20 +216,36 @@ s<-(seq(length=100, from=0.00001, to=0.01)) #space parameter (bytes^-1)
 Los ejes tienen escala logarítmica (base 10) con s en unidades de $bytes^-1$, t en segundos y $\alpha(s,t)$ en bytes por segundo.
 
 ````{r}
-Bw<-function(s,t) {log10(l+((((o^2)*(t^((2*H)-1)))/2)*s))}   
+Bw<-function(t,s) {log10(l+((((o^2)*(t^((2*H)-1)))/2)*s))}   
 z<-outer(t,s,Bw) # La función outer evalua la función Bw en cada punto(si,tj)
 
-persp((t),(s),(z),theta=20,phi=-0,col = "lightblue", main="Ancho de Banda Efectivo",
-      ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
+persp((t),(s),(z),theta=20,phi=-0,col ="lightblue", sub="Ancho de Banda Efectivo",ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
+````
+
+
+Calculando el punto crítico $\boldsymbol{\alpha(s,t)}$
+
+````{r}
+#Ejemplo 1
+#Cálculo analítico del ancho de banda efectivo de la traza
+C<-37
+B<-5
+u<-35.09
+var<-25.53
+H<-0.75
+
+t<-(B/(C-u))*(H/(1-H))      #8
+s<-(B+(C+u)*t)/(var*t^(2*H)) #0.0355
+
+
+Bw_MFB<-u+(((s*var)/2)*(t^(2*H-1)))
+Bw_MFB
 ````
 
 
 
-##Procesos de Colas pesadas
-
-
-##Procesos de Colas pesadas, autosimilares y LRD.
-####$\alpha$-Stable Farima
+##Procesos de Colas pesadas, autosimilares y LRD
+####$\alpha$-Stable Farima 
 Este modelo se usa en el estudio de las redes modernas de tráfico,con tendencia a incrementos con colas pesadas y procesos de dependencia de rango largo.
 
 
