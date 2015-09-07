@@ -38,18 +38,6 @@ bellx<-h_data$breaks
 plot(bellx,belly,type="l",xlab="time (s)",ylab="Packets",main="Bellcore trace", ylim=c(0,500))
 ````
 
-Para este análisis se considera una muestra de los primeros 512 segundos que corresponden a 1025 bytes por segundo
-
-````{r echo=FALSE, warning=FALSE}
-library(quantmod)
-set_belly<-head(belly,1025)
-set_bellx<-head(bellx,1025)
-
-plot(set_bellx,set_belly,type="l",xlab="time (ms)",ylab="Packets",main="Muestra Bellcore trace", ylim=c(0,500))
-abline(v=NULL,h=400,lty=3,col="green")
-abline(v=NULL,h=35,lty=3,col="green")
-````
-
 
 ##Procesos de Renovación: Modelos con Incrementos Independientes
 ####Flujo con Movimiento Browniano
@@ -248,7 +236,98 @@ Bw_MFB
 ####$\alpha$-Stable Farima 
 Este modelo se usa en el estudio de las redes modernas de tráfico,con tendencia a incrementos con colas pesadas y procesos de dependencia de rango largo.
 
+Considerando un flujo de longitud 512 con dependencia de rango largo y con incrementos de cola pesada. Con parámetros: 
 
+Taza promedio de arribo $\hat{\mu} = 24.968$
+Varianza de la taza de arribo $\hat{\theta^2} = 4.058$
+
+El flujo tiene una taza de servicio de C=25, un buffer de tamaño B=4.Como no hay una fórmula para determinar el punto crítico, se emplea la misma del movimiento browniano
+
+Calculando el ancho de banda efectivo, se obtiene:
+$$\alpha(s,t)=\mu + \frac{(s*\theta^2)}{2}$$
+
+````{r}
+C<-25
+B<-4
+u<-24.968
+var<-4.058
+
+s<-(2*(C-u))/var
+t<-B/(C-u)
+
+Bw_MB<-u+((s*var)/2)
+Bw_MB
+
+````
+
+El valor esperado es que el ancho de banda efectivo sea sustancialmente mayor que la taza promedio de arribo, por lo tanto se debería usar otro estimador para hacer el cálculo.
+
+
+
+##Ancho de banda de traza de tráfico real
+###Traza Bellcore
+Para este análisis se considera una muestra de los primeros 512 segundos que corresponden a 1025 bytes por segundo
+
+````{r echo=FALSE, warning=FALSE}
+library(quantmod)
+set_belly<-head(belly,1025)
+set_bellx<-head(bellx,1025)
+
+plot(set_bellx,set_belly,type="l",xlab="time (ms)",ylab="Packets",main="Muestra Bellcore trace", ylim=c(0,500))
+abline(v=NULL,h=400,lty=3,col="green")
+abline(v=NULL,h=35,lty=3,col="green")
+````
+
+Considerando los parámetros:
+Taza promedio de arribo $\hat{\mu} = 1.591$
+Varianza de la taza de arribo $\hat{\theta^2} = 4.169$
+
+
+El flujo tiene una taza de servicio de C=2.9, un buffer de tamaño B=0.3 (300 Bytes). Ya que no hay una fórmula para el cálculo, se usarán los estimadores anteriormente descritos: 
+
+**Estimador de movimiento browniano.**
+
+Calculando el punto crítico $\boldsymbol{\alpha(s,t)}$, que está determinado:
+
+````{r}
+C<-2.9
+B<-0.3
+u<-1.591
+var<-4.169
+
+s<-(2*(C-u))/var
+t<-B/(C-u)
+
+Bw_MB<-u+((s*var)/2)
+Bw_MB
+
+````
+
+**EStimador con movimiento fractal browniano**
+
+````{r}
+C<-2.9
+B<-0.3
+u<-1.591
+var<-4.169
+````
+
+Calculando el parámetro Hurts de la traza:
+````{r}
+H<-0.75
+````
+
+
+Calculando el ancho de banda:
+
+````{r}
+t<-(B/(C-u))*(H/(1-H))      
+s<-(B+(C+u)*t)/(var*t^(2*H)) 
+
+
+Bw_MFB<-u+(((s*var)/2)*(t^(2*H-1)))
+Bw_MFB
+````
 
 
 ##Referencias
