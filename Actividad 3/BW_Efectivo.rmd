@@ -12,8 +12,11 @@ En cuanto a su estimación hay dos enfoques, el paramétrico y el no paramétric
 
 El presente análisis, se realiza con un enfoque paramétrico donde se trabaja con la traza conocida de Bellcore, modelos sencillos como el movimiento browniano, seguido de Fluido de Markov ON/OFF, movimiento fraccional browniano y modelo de FARIMA ya que estos modelos presentan una variadad de características observadas en muchas formas en el tráfico real.
 
+````{r}
+library(rgl) #Libreria para ver los gráficos interactivos, no sirve para verlos en PDF
+````
 
-##Traza de Tráfico Real
+##Traza de Tráfico Ethernet
 ####Traza Bellcore
 Esta traza de tráfico de BELLCORE labs, esta traza contiene 1000000 de paquetes y se encuentran en dos columnas, en formato ASCII, veinte bytes por línea. La primera línea muestra el tiempo en segundos desde el comienzo de la traza. La segunda columna muestra el tamaño del paquete en bytes, incluyendo parte del encabezado y el código de redundancia cíclica (CRC), tener encuenta que que con el protocolo Ethernet los paquetes poseen un tamaño mínimo de 64 bytes y un máximo de 1.518 bytes.
 
@@ -39,6 +42,9 @@ plot(bellx,belly,type="l",xlab="time (s)",ylab="Packets",main="Bellcore trace", 
 ````
 
 
+Para los experimentos a continuación, se emplearán trazas con una longitud de 512.
+
+
 ##Procesos de Renovación: Modelos con Incrementos Independientes
 ####Flujo con Movimiento Browniano
 
@@ -46,12 +52,12 @@ El movimiento browniano se ha utilizado como un caso limitado del tráfico pesad
 
 ````{r echo=FALSE, warning=FALSE}
 library(somebm)
-bmdata <- bm(x0=1, t0=0.01, t=2, n=1000)
-plot(bmdata, xlab="time (s)",ylab="Packets",main="Brownian motion trace")
+set.seed(1200)
+bmdata <- bm(x0=1, t0=0.01, t=3000, n=500)
+plot(bmdata, xlab="time (s)",ylab="x",main="Brownian motion trace")
 ````
 
-Si se considera una traza con una longitud de 512 con los siguientes prámetros:
-
+Si se considera un proceso browniano con una longitud de 512 valores y los siguientes prámetros:
 
 Taza promedio de arribo $\hat{\mu} = 50.83$
 Varianza de la taza de arribo $\hat{\theta^2} = 30.18$
@@ -59,23 +65,25 @@ Varianza de la taza de arribo $\hat{\theta^2} = 30.18$
 
 El flujo tiene una taza de servicio de C=52, un buffer de tamaño B=5.
 
-Calculando el punto crítico $\boldsymbol{\alpha(s,t)}$, que está determinado [1]:
+Calculando el punto crítico $\boldsymbol{\alpha(s,t)}$, que está determinado por: [1]:
 
-$$\alpha(s,t)=\mu + \frac{(s*\theta^2)}{2}$$
+$$\alpha(s,t)=\mu + \frac{(s\theta^2)}{2}$$
+
+Esta fuente es de tipo gaussiano y su cálculo de ancho de banda efectivo no depende de t ya que es un proceso de incrementos independientes. Además es lineal en s.[4] 
 
 ````{r}
-C<-52
-B<-5
-u<-50.83
+C<-52 #tasa de servicio
+u<-seq(length=30, from=10, to=60) #tasa promedio de arribos #50,83
 var<-30.18
 
-s<-(2*(C-u))/var
-t<-B/(C-u)
+s<-(2*(C-u))/var   
 
 Bw_MB<-u+((s*var)/2)
-Bw_MB
+plot(s,Bw_MB) 
 
 ````
+
+Esta fuente es de tipo gaussiano y su cálculo de ancho de banda efectivo no depende de t ya que es un proceso es de incrementos independientes. Además es lineal en s. El cálculo del ancho de banda efectivo de este modelo depende del valor C.
 
 
 
@@ -89,11 +97,12 @@ Si el flujo Markoviano modulado por una cadena de Markov con dos estados 0 (OFF)
 El generador infinitesimal de la cadena es la matriz Q y H es una matriz diagonal con elementos hi en la diagonal[4]:
 
 $$ Q = \begin{pmatrix} -\lambda & \lambda \\ \mu & -\mu\end{pmatrix}$$
+
 $$ H = \begin{pmatrix} 0 & 0 \\ 0 & h\end{pmatrix}$$
 
-donde $\lambda$¸ se interpretaba como la cantidad de transiciones del estado 0 al estado h por unidad de tiempo y $\mu$ como la cantidad de transiciones que salen de 0 por unidad de tiempo. $vec{\pi}$ es la distribución estacionaria de la cadena, este es un vector de probabilidad $\pi$ tal que $\pi Q =\vec{0}$ , la distribución invariante de la cadena es:
+donde $\lambda$¸ se interpreta como la cantidad de transiciones del estado 0 al estado h por unidad de tiempo y $\mu$ como la cantidad de transiciones que salen de 0 por unidad de tiempo. $\vec{\pi}$ es la distribución estacionaria de la cadena, este es un vector de probabilidad $\pi$ tal que $\pi Q =\vec{0}$ , la distribución invariante de la cadena es:
 
-$$\pi =(\frac{\mu}{\lambda + \mu};\frac{\lambda}{\lambda + \mu})$$
+$$\pi =\left(\frac{\mu}{\lambda + \mu};\frac{\lambda}{\lambda + \mu}\right)$$
 
 Tomando como distribución inicial de la cadena la distribución invariante, el ancho de banda efectivo que resulta es:
 
@@ -101,35 +110,39 @@ $$\boldsymbol{\alpha(s,t)=log\{ \vec{\pi} exp[(Q + Hs) t] \vec{1} \}}$$
 
 Reemplazando, se obtiene:
 
-$\alpha(s,t)=log\{ (\frac{\mu}{\lambda + \mu};\frac{\lambda}{\lambda + \mu}) exp[\begin{pmatrix} -\lambda & \lambda \\ \mu & -\mu + hs\end{pmatrix} t] \vec{1} \}$
+$\alpha(s,t)=$ $log\{(\frac{\mu}{\lambda + \mu};\frac{\lambda}{\lambda + \mu})$ $exp(\begin{smallmatrix} -\lambda & \lambda \\ \mu & -\mu\end{smallmatrix})$ $t \vec{1} \}$
 
-Para simular es fluo, se considera:
-$\lambda = \mu= 0.01, h= 0.01 y n= 10000.$
+Para simular este fluo, se considera:
+$\lambda =$ $\mu= 0.01,$ $h= 0.01$ y $n= 10000.$
 
 Aplicando un estimador markoviano EMV, los valores obtenidos son:
 
-
-Calculando el punto crítico $\alpha(s,t)$:
+Calculando el ancho de banda $\alpha(s,t)$:
 
 ````{r}
-library(rgl)
+#library(rgl)
 
-l<-0.4
-u<-0.3
-h<-0.1
+l<-0.4#0.01012  #0.4
+u<-0.3#0.01034  #0.3
+h<-3#0.01     #3
 Q<-matrix(c(-l,u,l,-u),2,2)
 H<-matrix(c(0,0,0,h),2,2)
 V<-matrix(1,2,2)
+````
+
+````{r}
 Q
 H
 ````
-````{r}
+
+````{r warning=FALSE}
+
 #Distribución invariante es un vector de probabilidad pi tal que piQ=0, entonces:
 pi1<-l/(l+u)
 pi2<-u/(l+u)
 
-space<-seq(length=50, from=1, to=100)
-time<-seq(length=50, from=1, to=30) #ms
+space<-seq(length=50, from=0.5, to=5) #0.5 to 5 0 to 4000
+time<-seq(length=50, from=0, to=30) #ms 1 to 30 1 to 20
 s<-(space)
 t<-(time)
 
@@ -154,7 +167,13 @@ facetcol<-cut(zfacet,nbcol)
 persp(t,s,z,theta=-30,phi=0,col = color[facetcol],front="lines", 
       sub="Ancho de banda efectivo de una fuente ON/OFF",
       ticktype = "detailed",xlab="time (ms)",ylab="space (s)",zlab="(s,t)")  
+
+#persp3d(t,s,z,theta=-30,phi=0,col = color[facetcol],front="lines", 
+ #     sub="Ancho de banda efectivo de una fuente ON/OFF",
+ #    ticktype = "detailed",xlab="time (ms)",ylab="space (s)",zlab="(s,t)")
+
 ````
+
 
 
 
@@ -168,7 +187,7 @@ El movimiento browniano es utilizado en eldimensionado de recursos, el cálculo 
 
 ````{r echo=FALSE, warning=FALSE}
 library(somebm)
-fbmdata <- fbm(hurst=0.75, n=1000)
+fbmdata <- fbm(hurst=0.75, n=3000)
 plot(fbmdata, xlab="time (s)",ylab="Packets",main="Fractional brownian motion trace")
 ````
 
@@ -270,8 +289,8 @@ Para este análisis se considera una muestra de los primeros 512 segundos que co
 
 ````{r echo=FALSE, warning=FALSE}
 library(quantmod)
-set_belly<-head(belly,1025)
-set_bellx<-head(bellx,1025)
+set_belly<-head(belly,1025) #packet size
+set_bellx<-head(bellx,1025) #time
 
 plot(set_bellx,set_belly,type="l",xlab="time (ms)",ylab="Packets",main="Muestra Bellcore trace", ylim=c(0,500))
 abline(v=NULL,h=400,lty=3,col="green")
@@ -310,11 +329,60 @@ C<-2.9
 B<-0.3
 u<-1.591
 var<-4.169
+H<-0.75
+
 ````
 
 Calculando el parámetro Hurts de la traza:
 ````{r}
-H<-0.75
+library(fArma)
+library(longmemo)
+library(somebm)
+x<-data(ethernetTraffic)
+````
+
+Ethernet traffic data from a LAN at Bellcore, Morristown (Leland et al. 1993, Leland and Wilson 1991). The data are listed in chronological sequence by row.
+
+````{r}
+#Ejemplo de cálculo del parámetro HURTS: 
+par(mfrow = c(2, 2))
+#Aggregated variance method
+aggvarFit(x, levels = 50, minnpts = 3, cut.off = 10^c(0.7, 2.5),
+doplot = TRUE, trace = FALSE, title = NULL, description = NULL)
+#Differenced aggregated variance method
+diffvarFit(x, levels = 50, minnpts = 3, cut.off = 10^c(0.7, 2.5),
+doplot = TRUE, trace = FALSE, title = NULL, description = NULL)
+#aggregated absolute value (moment) method
+absvalFit(x, levels = 50, minnpts = 3, cut.off = 10^c(0.7, 2.5), moment = 1,
+doplot = TRUE, trace = FALSE, title = NULL, description = NULL)
+#Higuchi’s or fractal dimension method
+higuchiFit(x, levels = 50, minnpts = 2, cut.off = 10^c(0.7, 2.5),
+doplot = TRUE, trace = FALSE, title = NULL, description = NULL)
+````
+
+````{r}
+par(mfrow = c(2, 2))
+#Peng’s or variance of residuals method
+pengFit(x, levels = 50, minnpts = 3, cut.off = 10^c(0.7, 2.5),
+method = c("mean", "median"),
+doplot = TRUE, trace = FALSE, title = NULL, description = NULL)
+#R/S Rescaled Range Statistic method
+rsFit(x, levels = 50, minnpts = 3, cut.off = 10^c(0.7, 2.5),
+doplot = TRUE, trace = FALSE, title = NULL, description = NULL)
+#periodogram method
+perFit(x, cut.off = 0.1, method = c("per", "cumper"),
+doplot = TRUE, title = NULL, description = NULL)
+#boxed (modified) periodogram method
+boxperFit(x, nbox = 100, cut.off = 0.10,
+doplot = TRUE, trace = FALSE, title = NULL, description = NULL)
+````
+
+````{r}
+#Interactive Display of Hurst Estimates
+hurstSlider(x = fgnSim())
+#waveletFit wavelet estimator.
+waveletFit(x, length = NULL, order = 2, octave = c(2, 8),
+doplot = TRUE, title = NULL, description = NULL)
 ````
 
 
@@ -329,6 +397,9 @@ Bw_MFB<-u+(((s*var)/2)*(t^(2*H-1)))
 Bw_MFB
 ````
 
+x1 <- simFGN0(100, 0.7) #Simulación de un proceso fraccional gaussiano
+x2 <- simARMA0(100, 0.7)
+x3<-plot(simFGN0(1000, 0.8)) #- time series plot
 
 ##Referencias
 [1] Ravinovitch, Statistical Estimation of Effective Bandwidth. Concordia University. 2000

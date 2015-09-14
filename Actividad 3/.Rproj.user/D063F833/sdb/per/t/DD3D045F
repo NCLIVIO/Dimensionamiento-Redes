@@ -1,0 +1,17 @@
+{
+    "contents" : "---\ntitle: \"Borrador\"\nauthor: \"Natalia Clivio\"\ndate: \"Sunday, August 09, 2015\"\noutput: pdf_document\n---\n\n\nCalculando el punto crítico $\\boldsymbol{\\alpha(s,t)}$, que está determinado:\n\n$\\boldsymbol{\\alpha(s,t)=\\mu + \\frac{(s\\theta^2)}{2}}$\n\n\n$$ Q = \\begin{pmatrix} -\\lambda & \\lambda \\\\ \\mu & -\\mu\\end{pmatrix}$$\n\n\n$$\\pi =(\\frac{\\mu}{\\lambda + \\mu};\\frac{\\lambda}{\\lambda + \\mu})$$\n\n\n$$\\pi =\\left(\\frac{\\mu}{\\lambda + \\mu};\\frac{\\lambda}{\\lambda + \\mu}\\right)$$\n\nTomando como distribución inicial de la cadena la distribución invariante, el ancho de banda efectivo que resulta es:\n\n$$\\boldsymbol{\\alpha(s,t)=log\\{ \\vec{\\pi} exp[(Q + Hs) t] \\vec{1} \\}}$$\n\nReemplazando, se obtiene: \n\n$\\alpha(s,t)=$ $log\\{(\\frac{\\mu}{\\lambda + \\mu};\\frac{\\lambda}{\\lambda + \\mu})$ $exp(\\begin{smallmatrix} -\\lambda & \\lambda \\\\ \\mu & -\\mu\\end{smallmatrix})$ $t \\vec{1} \\}$\n\n",
+    "created" : 1439144992278.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "132530320",
+    "id" : "DD3D045F",
+    "lastKnownWriteTime" : 1442114575,
+    "path" : "~/GitHub/Dimensionamiento-Redes/Actividad 3/Borrador.Rmd",
+    "project_path" : "Borrador.Rmd",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_markdown"
+}
