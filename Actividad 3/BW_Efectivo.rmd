@@ -1,20 +1,16 @@
 ---
 title: "Estimación estadística del Ancho de Banda Efectivo"
 author: "Natalia Clivio"
-date: "2015"
-header-includes:
-  - \usepackage{dcolumn}
+date: '2015'
 output: pdf_document
 ---
+
 El ancho de banda efectivo es una medida usada en el dimensionamiento y planeamiento de redes de comunicaciones modernas. El objetivo de este análisis, es estimar el ancho de banda efectivo para distintos modelos de tráfico y compararlo con la traza conocida como la de Bellcore y ver que modelo se ajusta al comportamiento de la traza.
 
 En cuanto a su estimación hay dos enfoques, el paramétrico y el no paramétrico. En el enfoque paramétrico se asume un modelo de la fuente de tráfico y a partir de las trazas se estima un conjunto de parámetros de dicho modelo. De esa forma se obtiene un estimador del ancho de banda efectivo y además es posible calcular su intervalo de confianza. En el enfoque no paramétrico, no se asume un modelo específico del tráfico y se procura construir un estimador del ancho de banda efectivo calculando el valor esperado que aparece en la función generatriz de momentos a través de promedios temporales en la traza.
 
 El presente análisis, se realiza con un enfoque paramétrico donde se trabaja con la traza conocida de Bellcore, modelos sencillos como el movimiento browniano, seguido de Fluido de Markov ON/OFF, movimiento fraccional browniano y modelo de FARIMA ya que estos modelos presentan una variadad de características observadas en muchas formas en el tráfico real.
 
-````{r}
-library(rgl) #Libreria para ver los gráficos interactivos, no sirve para verlos en PDF
-````
 
 ##Traza de Tráfico Ethernet
 ####Traza Bellcore
@@ -80,7 +76,6 @@ s<-(2*(C-u))/var
 
 Bw_MB<-u+((s*var)/2)
 plot(s,Bw_MB) 
-
 ````
 
 Esta fuente es de tipo gaussiano y su cálculo de ancho de banda efectivo no depende de t ya que es un proceso es de incrementos independientes. Además es lineal en s. El cálculo del ancho de banda efectivo de este modelo depende del valor C.
@@ -164,17 +159,14 @@ zfacet<-z[−1,−1]+z[−1,−ncz]+z[−nrz,−1] +z[−nrz,−ncz]
 # Recode facet z-values into color indices
 facetcol<-cut(zfacet,nbcol)
 
-persp(t,s,z,theta=-30,phi=0,col = color[facetcol],front="lines", 
+persp(t,s,z,theta=-30,phi=0,col = color[facetcol],
       sub="Ancho de banda efectivo de una fuente ON/OFF",
       ticktype = "detailed",xlab="time (ms)",ylab="space (s)",zlab="(s,t)")  
-
-#persp3d(t,s,z,theta=-30,phi=0,col = color[facetcol],front="lines", 
- #     sub="Ancho de banda efectivo de una fuente ON/OFF",
- #    ticktype = "detailed",xlab="time (ms)",ylab="space (s)",zlab="(s,t)")
-
 ````
 
-
+persp3d(t,s,z,theta=-30,phi=0,col = color[facetcol],front="lines", 
+sub="Ancho de banda efectivo de una fuente ON/OFF",
+ticktype = "detailed",xlab="time (ms)",ylab="space (s)",zlab="(s,t)")
 
 
 ##Modelos dependientes con rango largo (LRD)
@@ -281,14 +273,12 @@ Bw_MB
 
 El valor esperado es que el ancho de banda efectivo sea sustancialmente mayor que la taza promedio de arribo, por lo tanto se debería usar otro estimador para hacer el cálculo.
 
-
-
 ##Ancho de banda de traza de tráfico real
 ###Traza Bellcore
 Para este análisis se considera una muestra de los primeros 512 segundos que corresponden a 1025 bytes por segundo
 
 ````{r echo=FALSE, warning=FALSE}
-library(quantmod)
+#library(quantmod)
 set_belly<-head(belly,1025) #packet size
 set_bellx<-head(bellx,1025) #time
 
@@ -330,83 +320,17 @@ B<-0.3
 u<-1.591
 var<-4.169
 H<-0.75
-
 ````
 
 Calculando el parámetro Hurts de la traza:
-````{r}
+````{r warning=FALSE}
 library(fArma)
 library(longmemo)
-library(somebm)
-x<-data(ethernetTraffic)
+
+data(ethernetTraffic)
+x<-ethernetTraffic
+summary(x)
 ````
 
 Ethernet traffic data from a LAN at Bellcore, Morristown (Leland et al. 1993, Leland and Wilson 1991). The data are listed in chronological sequence by row.
-
-````{r}
-#Ejemplo de cálculo del parámetro HURTS: 
-par(mfrow = c(2, 2))
-#Aggregated variance method
-aggvarFit(x, levels = 50, minnpts = 3, cut.off = 10^c(0.7, 2.5),
-doplot = TRUE, trace = FALSE, title = NULL, description = NULL)
-#Differenced aggregated variance method
-diffvarFit(x, levels = 50, minnpts = 3, cut.off = 10^c(0.7, 2.5),
-doplot = TRUE, trace = FALSE, title = NULL, description = NULL)
-#aggregated absolute value (moment) method
-absvalFit(x, levels = 50, minnpts = 3, cut.off = 10^c(0.7, 2.5), moment = 1,
-doplot = TRUE, trace = FALSE, title = NULL, description = NULL)
-#Higuchi’s or fractal dimension method
-higuchiFit(x, levels = 50, minnpts = 2, cut.off = 10^c(0.7, 2.5),
-doplot = TRUE, trace = FALSE, title = NULL, description = NULL)
-````
-
-````{r}
-par(mfrow = c(2, 2))
-#Peng’s or variance of residuals method
-pengFit(x, levels = 50, minnpts = 3, cut.off = 10^c(0.7, 2.5),
-method = c("mean", "median"),
-doplot = TRUE, trace = FALSE, title = NULL, description = NULL)
-#R/S Rescaled Range Statistic method
-rsFit(x, levels = 50, minnpts = 3, cut.off = 10^c(0.7, 2.5),
-doplot = TRUE, trace = FALSE, title = NULL, description = NULL)
-#periodogram method
-perFit(x, cut.off = 0.1, method = c("per", "cumper"),
-doplot = TRUE, title = NULL, description = NULL)
-#boxed (modified) periodogram method
-boxperFit(x, nbox = 100, cut.off = 0.10,
-doplot = TRUE, trace = FALSE, title = NULL, description = NULL)
-````
-
-````{r}
-#Interactive Display of Hurst Estimates
-hurstSlider(x = fgnSim())
-#waveletFit wavelet estimator.
-waveletFit(x, length = NULL, order = 2, octave = c(2, 8),
-doplot = TRUE, title = NULL, description = NULL)
-````
-
-
-Calculando el ancho de banda:
-
-````{r}
-t<-(B/(C-u))*(H/(1-H))      
-s<-(B+(C+u)*t)/(var*t^(2*H)) 
-
-
-Bw_MFB<-u+(((s*var)/2)*(t^(2*H-1)))
-Bw_MFB
-````
-
-x1 <- simFGN0(100, 0.7) #Simulación de un proceso fraccional gaussiano
-x2 <- simARMA0(100, 0.7)
-x3<-plot(simFGN0(1000, 0.8)) #- time series plot
-
-##Referencias
-[1] Ravinovitch, Statistical Estimation of Effective Bandwidth. Concordia University. 2000
-
-[2]García, Contribución al Desarrollo de Herramientas Estratégicas para el Diseño,Dimensionado y Evaluación de Redes de Telecomunicación de Banda Ancha. 2009
-
-[3]Gibbens, Traffic characterisation and effective bandwidths for broadband network traces.
-
-[4]Bermolen Paola, Ancho de Banda Efectivo para flujos markovianos.2003
 
