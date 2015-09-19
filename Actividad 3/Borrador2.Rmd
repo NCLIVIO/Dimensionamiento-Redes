@@ -1,0 +1,44 @@
+---
+title: "Borrador2"
+author: "Natalia Clivio"
+date: "Saturday, September 19, 2015"
+output: pdf_document
+---
+
+Ethernet traffic data from a LAN at Bellcore, Morristown (Leland et al. 1993, Leland and Wilson 1991). The data are listed in chronological sequence by row.
+
+Calculando el parámetro Hurts de la traza:
+
+
+1.Aggregated variance method
+
+![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/absvalFit.png)
+
+2.Differenced aggregated variance method
+
+![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/diffvarFit.png)
+
+
+3.Aggregated absolute value (moment) method
+![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/absvalFit.png)
+
+4.Higuchi’s or fractal dimension method
+
+![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/absvalFit.png)
+
+5. Peng’s or variance of residuals method
+
+![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/pengFit.png)
+
+6. R/S Rescaled Range Statistic method
+
+![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/rsFit.png)
+
+7. Periodogram method
+
+![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/perFit.png)
+
+8. WaveletFit wavelet estimator
+
+![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/waveletFit.png)
+

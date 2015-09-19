@@ -198,6 +198,24 @@ Varianza de la taza de arribo $\hat{\theta^2} = 25.53$
 
 El flujo tiene una taza de servicio de C=37, un buffer de tamaño B=5.
 
+Calculando el punto crítico $\boldsymbol{\alpha(s,t)}$
+
+````{r}
+#Ejemplo 1
+#Cálculo analítico del ancho de banda efectivo de la traza
+C<-37
+B<-5
+u<-35.09
+var<-25.53
+H<-0.75
+
+t<-(B/(C-u))*(H/(1-H))      #8
+s<-(B+(C+u)*t)/(var*t^(2*H)) #0.0355
+
+
+Bw_MFB<-u+(((s*var)/2)*(t^(2*H-1)))
+Bw_MFB
+````
 
 Calculando el ancho de banda efectivo, se obtiene:
 
@@ -218,27 +236,8 @@ Los ejes tienen escala logarítmica (base 10) con s en unidades de $bytes^-1$, t
 Bw<-function(t,s) {log10(l+((((o^2)*(t^((2*H)-1)))/2)*s))}   
 z<-outer(t,s,Bw) # La función outer evalua la función Bw en cada punto(si,tj)
 
-persp((t),(s),(z),theta=20,phi=-0,col ="lightblue", sub="Ancho de Banda Efectivo",ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
-````
-
-
-Calculando el punto crítico $\boldsymbol{\alpha(s,t)}$
-
-````{r}
-#Ejemplo 1
-#Cálculo analítico del ancho de banda efectivo de la traza
-C<-37
-B<-5
-u<-35.09
-var<-25.53
-H<-0.75
-
-t<-(B/(C-u))*(H/(1-H))      #8
-s<-(B+(C+u)*t)/(var*t^(2*H)) #0.0355
-
-
-Bw_MFB<-u+(((s*var)/2)*(t^(2*H-1)))
-Bw_MFB
+persp((t),(s),(z),theta=20,phi=-0,col ="lightblue", sub="Ancho de Banda Efectivo de un proceso con movimiento fractal browniano"
+      ,ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
 ````
 
 
@@ -314,16 +313,8 @@ Bw_MB
 
 **EStimador con movimiento fractal browniano**
 
-````{r}
-C<-2.9
-B<-0.3
-u<-1.591
-var<-4.169
-H<-0.75
-````
-
 Calculando el parámetro Hurts de la traza:
-````{r warning=FALSE}
+````{r echo=FALSE,warning=FALSE}
 library(fArma)
 library(longmemo)
 
@@ -332,5 +323,62 @@ x<-ethernetTraffic
 summary(x)
 ````
 
-Ethernet traffic data from a LAN at Bellcore, Morristown (Leland et al. 1993, Leland and Wilson 1991). The data are listed in chronological sequence by row.
+1.Aggregated variance method
 
+![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/absvalFit.png)
+
+2.Differenced aggregated variance method
+
+![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/diffvarFit.png)
+
+3.Aggregated absolute value (moment) method
+
+![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/absvalFit.png)
+
+4.Higuchi’s or fractal dimension method
+
+![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/absvalFit.png)
+
+5. Peng’s or variance of residuals method
+
+![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/pengFit.png)
+
+6. R/S Rescaled Range Statistic method
+
+![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/rsFit.png)
+
+7. Periodogram method
+
+![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/perFit.png)
+
+8. WaveletFit wavelet estimator
+
+![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/waveletFit.png)
+
+
+Tomando como referencia los siguientes parámetros se obtiene:
+Calculando el ancho de banda:
+
+````{r}
+C<-2.9
+B<-0.3
+u<-1.591
+var<-4.169
+H<-0.8
+
+t<-(B/(C-u))*(H/(1-H))      
+s<-(B+(C+u)*t)/(var*t^(2*H)) 
+
+
+Bw_MFB<-u+(((s*var)/2)*(t^(2*H-1)))
+Bw_MFB
+````
+
+Se obtiene una mejor aproximación con el modelo frantal browniano para la traza de datos ya que el valor del ancho de banda efectivo de la traza es superior a la taza promedio de arribo.
+
+````{r}
+set<-plot(set_bellx,set_belly,type="l",xlab="time (ms)",ylab="Packets",
+          main="Muestra Bellcore trace", ylim=c(0,500))
+abline(v=NULL,h=400,lty=3,col="red")
+abline(v=NULL,h=159,lty=3,col="blue")
+````
