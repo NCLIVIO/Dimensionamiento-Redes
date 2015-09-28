@@ -396,6 +396,14 @@ x1 <- simFGN0(100, 0.7) #Simulación de un proceso fraccional gaussiano
 x2 <- simARMA0(100, 0.7)
 x3<-plot(simFGN0(1000, 0.8)) #- time series plot
 
+````{r}
+arima<-(armaSim(model = list(ar = c(0.5, -0.5), d = 0, ma = 0.1), n = 100, 
+    innov = NULL, n.start = 100, start.innov = NULL, 
+    rand.gen = rnorm, rseed = NULL, addControl = FALSE))
+plot(arima)
+````
+
+
 ##Referencias
 [1] Ravinovitch, Statistical Estimation of Effective Bandwidth. Concordia University. 2000
 

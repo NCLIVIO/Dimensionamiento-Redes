@@ -272,7 +272,7 @@ Bw_MB
 
 El valor esperado es que el ancho de banda efectivo sea sustancialmente mayor que la taza promedio de arribo, por lo tanto se debería usar otro estimador para hacer el cálculo.
 
-##Ancho de banda de traza de tráfico real
+##Ancho de banda efectivo para una fuente de Tráfico Ethernet
 ###Traza Bellcore
 Para este análisis se considera una muestra de los primeros 512 segundos que corresponden a 1025 bytes por segundo
 
@@ -382,3 +382,87 @@ set<-plot(set_bellx,set_belly,type="l",xlab="time (ms)",ylab="Packets",
 abline(v=NULL,h=400,lty=3,col="red")
 abline(v=NULL,h=159,lty=3,col="blue")
 ````
+
+
+##Ancho de banda efectivo para una fuente de video MPEG
+###Traza MPEG 4 
+A continuación se modela una traza de video comprimido en MPEG 4. Esta traza tiene: 89998 frames, tiene una duración de 3600 seg y fue capturada Tue Oct 10 04:43:28 2000. 
+
+
+```{r echo=FALSE}
+mpeg<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/MPEG/Terse_StarWarsIV.dat",
+               header=TRUE,sep=";",na.strings="NA",dec=".")
+
+datampeg<-data.frame(Bits=head(mpeg$X919,89997))
+
+data<-head(datampeg,250)
+time<-(seq(length=250, from=1, to=10))    #time parameter (s)
+
+set<-data.frame(time,data)
+plot(set, type="h",ylab="bits/frame",xlab="time (secs)",main="Dataset de película Star Wars MPEG-4")
+````
+
+La anterior traza corresponde a frames de video producidos a una frecuencia constante de 25 frames por segundo, es generada por un codificador de video de MPEG fuertemente influenciado por la combinación de codificaciones intra e interframe que se utiliza para la codificación de la secuencia de imágenes. 
+
+Hay tres tipos de imágenes intra **(I)** que se codifican sin ninguna dreferencia d eotras imágenes, las imágenes codificadas predictivamente **(P)** están codificadas mas eficientemente utilizando la predicción compensada en movimiento de la imágen P o I inmediatamente anterior, las imágenes **B** son las codificadas bidireccionalmente y alcanzan mayor nivel de compresión empleando como referencia la compensación de movimiento de las imágenes P o I inmediatamente anterior y posterior. Este grupo de imágenes forma el grupo de imágenes **(GOP)** definido por la distancia L entre imágenes I y la distancia M entre imágenes P.
+
+La calidad de imágen depende del paso de cuantificación q. Con una estructura GOP de 12 frames: IBBPBBPBBPBB. Este codificador trabaja con parámetros: L=11, M=3, q=5. 
+
+Suponiendo que una fuente instantanea produce b unidades de datos en tiempos aleatorios dados por $\{Ud+id,i=0,1,...\}$, donde $U$ es una variable aleatoria y es uniformemente distribuida en [0,1]
+
+![Alt text](C:/Users/NataliaA/Documents/DataR/periodic_source.jpg)
+
+Considerando la definición de ancho de banda efectivo [3]:
+$$\alpha P(s,t)=\frac{b}{t}\left\lfloor\frac{t}{d}\right\rfloor+\frac{1}{st}log\left(1+\left(\frac{t}{d}-\left\lfloor\frac{t}{d}\right\rfloor\right)(e^{bs}-1)\right)$$\
+
+Por lo tanto la superposición de una fuente periódica y una fuente con una tasa de bit constante ($/lambda$) es:
+
+$$\alpha (s,t)= \lambda + \alpha P(s,t)$$
+
+````{r}
+l<-143.516  #bits per second
+d<-0.5      #seconds
+b<-40000    #bits
+
+time<-(seq(length=100, from=1, to=20))    #time parameter (ms)
+space<-(seq(length=100, from=1, to=20)) #space parameter (bytes^-1)
+
+t<-time
+s<-(space)
+````
+
+Los ejes tienen escala logarítmica (base 10) con s en unidades de $bytes^-1$, t en segundos y $\alpha(s,t)$ en bytes por segundo.
+
+````{r}
+Bwmpeg<-function(t,s) {((b/t)*floor(t/d))+((1/(s*t))*log10(1+((t/d)-floor(t/d))*(exp(b*s)-1)))}   
+
+z<-outer(t,s,Bwmpeg) # La función outer evalua la función Bw en cada punto(si,tj)
+
+#persp((t),(s),(z),theta=20,phi=-0,col ="lightblue", sub="Ancho de Banda Efectivo de una traza de video MPEG-4"
+#      ,ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
+````
+
+````{r}
+#library(rgl)
+#persp3d((t),(s),(z),theta=20,phi=-0,col ="lightblue",ticktype ="detailed",front#="lines",xlab="t (ms)",ylab="s",zlab="(s,t)")  
+````
+
+##Análisis Estadístico de Tráfico Agregado
+###Tráfico agregado de video MPEG
+La generación de la agregación consiste en diferentes copias desfasadas de la secuencia de video original. 
+
+
+
+
+
+
+
+##Referencias
+[1] Ravinovitch, Statistical Estimation of Effective Bandwidth. Concordia University. 2000
+
+[2]García, Contribución al Desarrollo de Herramientas Estratégicas para el Diseño,Dimensionado y Evaluación de Redes de Telecomunicación de Banda Ancha. 2009
+
+[3]Gibbens, Traffic characterisation and effective bandwidths for broadband network traces.
+
+[4]Bermolen Paola, Ancho de Banda Efectivo para flujos markovianos.2003
+

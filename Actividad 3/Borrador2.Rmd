@@ -5,40 +5,9 @@ date: "Saturday, September 19, 2015"
 output: pdf_document
 ---
 
-Ethernet traffic data from a LAN at Bellcore, Morristown (Leland et al. 1993, Leland and Wilson 1991). The data are listed in chronological sequence by row.
+Suponiendo que una fuente instantanea produce b unidades de datos en tiempos aleatorios dados por $\{Ud+id,i=0,1,...\}$, donde $U$ es una variable aleatoria y es uniformemente distribuida en [0,1]
 
-Calculando el parámetro Hurts de la traza:
+![Alt text](C:/Users/NataliaA/Documents/DataR/periodic_source.jpg)
 
-
-1.Aggregated variance method
-
-![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/absvalFit.png)
-
-2.Differenced aggregated variance method
-
-![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/diffvarFit.png)
-
-
-3.Aggregated absolute value (moment) method
-![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/absvalFit.png)
-
-4.Higuchi’s or fractal dimension method
-
-![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/absvalFit.png)
-
-5. Peng’s or variance of residuals method
-
-![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/pengFit.png)
-
-6. R/S Rescaled Range Statistic method
-
-![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/rsFit.png)
-
-7. Periodogram method
-
-![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/perFit.png)
-
-8. WaveletFit wavelet estimator
-
-![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/waveletFit.png)
-
+Considerando la definición de ancho de banda efectivo [3]:
+$$\alpha P(s,t)=\frac{b}{t}\left\lfloor\frac{t}{d}\right\rfloor+\frac{1}{st}log\left(1+\left(\frac{t}{d}-\left\lfloor\frac{t}{d}\right\rfloor\right)(e^{bs}-1)\right)$$\
