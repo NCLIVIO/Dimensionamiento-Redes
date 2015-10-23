@@ -1,0 +1,27 @@
+´´´´{r}
+#Cálculo analítico del ancho de banda efectivo de la traza
+C<-37
+B<-5
+u<-35.09
+var<-25.53
+H<-0.75
+
+t<-(B/(C-u))*(H/(1-H))      #8
+s<-(B+(C-u)*t)/(var*t^(2*H)) #0.0355
+s
+t
+
+Bw_MFB<-u+(((s*var)/2)*(t^(2*H-1)))
+Bw_MFB
+
+t<-log10(seq(length=100, from=1, to=100))    #time parameter (s)
+s<-log10(seq(length=100, from=1, to=5)) #space parameter (bytes^-1)
+
+#Los ejes tienen escala logarítmica (base 10) con s en unidades de bytes^- 1, t en segundos y α(s,t) en bytes por segundo.
+Bw<-function(t,s) {u+(((s*var)/2)*(t^(2*H-1)))}   
+z<-outer(t,s,Bw) # La función outer evalua la función Bw en cada punto
+(si,tj)
+
+persp((t),(s),(z),theta=20,phi=-0,col ="lightblue", sub="Ancho de Banda Efectivo de un proceso con movimiento fractal browniano"
+      ,ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
+      ´´´´
