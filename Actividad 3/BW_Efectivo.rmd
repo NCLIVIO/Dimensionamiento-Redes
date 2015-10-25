@@ -69,17 +69,21 @@ Esta fuente es de tipo gaussiano y su cálculo de ancho de banda efectivo no dep
 
 ````{r}
 C<-52 #tasa de servicio
-u<-seq(length=30, from=10, to=60) #tasa promedio de arribos #50,83
+u<-50.83
 var<-30.18
+s<-(2*(C-u))/var
+BWE_MB<-u+((s*var)/2)
+BWE_MB
 
-s<-(2*(C-u))/var   
-
-Bw_MB<-u+((s*var)/2)
-plot(s,Bw_MB) 
+#Variando el parámetro s, se obtiene:
+u<-seq(length=30, from=10, to=60) 
+s<-(2*(C-u))/var
+BWE_MB<-u+((s*var)/2)
+plot(s,BWE_MB,pch=20)
+lines(s,BWE_MB,col="blue")
 ````
 
-Esta fuente es de tipo gaussiano y su cálculo de ancho de banda efectivo no depende de t ya que es un proceso es de incrementos independientes. Además es lineal en s. El cálculo del ancho de banda efectivo de este modelo depende del valor C.
-
+El cálculo del ancho de banda efectivo de este modelo depende del valor C.
 
 
 ##Modelos dependientes con rango corto (SRD)
@@ -115,35 +119,40 @@ Aplicando un estimador markoviano EMV, los valores obtenidos son:
 Calculando el ancho de banda $\alpha(s,t)$:
 
 ````{r}
-#library(rgl)
-
 l<-0.4#0.01012  #0.4
 u<-0.3#0.01034  #0.3
 h<-3#0.01     #3
 Q<-matrix(c(-l,u,l,-u),2,2)
 H<-matrix(c(0,0,0,h),2,2)
 V<-matrix(1,2,2)
-````
-
-````{r}
 Q
 H
 ````
 
+````{r}
+BWEonoff<-(u*l*h^2)/(l+u)^2
+BWEonoff
+````
+
+Calculando el punto crítico **(s,t)**
 ````{r warning=FALSE}
 
-#Distribución invariante es un vector de probabilidad pi tal que piQ=0, entonces:
+#Distribución invariante es un vector de probabilidad pi tal que piQ=0, 
+#entonces:
+
 pi1<-l/(l+u)
 pi2<-u/(l+u)
 
-space<-seq(length=50, from=0.5, to=5) #0.5 to 5 0 to 4000
+space<-seq(length=50, from=1, to=300) #0.5 to 5 0 to 4000
 time<-seq(length=50, from=0, to=30) #ms 1 to 30 1 to 20
-s<-(space)
+s<-log10(space)
 t<-(time)
 
-Bw<-function(t,s) {(1/s)*log10(pi2+(exp((h*s))*pi1))}   
-z<-outer(t,s,Bw)     # La función outer evalua la función Bw en cada punto(si,tj)
+Bw<-function(t,s) {(1/s)*log(pi2+(exp((h*s))*pi1))}   
+z<-outer(t,s,Bw) # La función outer evalua la función Bw en cada punto (si,tj)
+````
 
+````{r echo=FALSE}
 nrz<-nrow(z)
 ncz<-ncol(z)
 
@@ -158,12 +167,15 @@ zfacet<-z[−1,−1]+z[−1,−ncz]+z[−nrz,−1] +z[−nrz,−ncz]
 
 # Recode facet z-values into color indices
 facetcol<-cut(zfacet,nbcol)
+````
 
+````{r}
 persp(t,s,z,theta=-30,phi=0,col = color[facetcol],
       sub="Ancho de banda efectivo de una fuente ON/OFF",
       ticktype = "detailed",xlab="time (ms)",ylab="space (s)",zlab="(s,t)")  
 ````
 
+library(rgl)
 persp3d(t,s,z,theta=-30,phi=0,col = color[facetcol],front="lines", 
 sub="Ancho de banda efectivo de una fuente ON/OFF",
 ticktype = "detailed",xlab="time (ms)",ylab="space (s)",zlab="(s,t)")
@@ -201,7 +213,6 @@ El flujo tiene una taza de servicio de C=37, un buffer de tamaño B=5.
 Calculando el punto crítico $\boldsymbol{\alpha(s,t)}$
 
 ````{r}
-#Ejemplo 1
 #Cálculo analítico del ancho de banda efectivo de la traza
 C<-37
 B<-5
@@ -209,9 +220,10 @@ u<-35.09
 var<-25.53
 H<-0.75
 
-t<-(B/(C-u))*(H/(1-H))      #8
-s<-(B+(C+u)*t)/(var*t^(2*H)) #0.0355
-
+t<-(B/(C-u))*(H/(1-H))      
+s<-(B+(C-u)*t)/(var*t^(2*H))
+t
+s
 
 Bw_MFB<-u+(((s*var)/2)*(t^(2*H-1)))
 Bw_MFB
@@ -220,26 +232,46 @@ Bw_MFB
 Calculando el ancho de banda efectivo, se obtiene:
 
 ````{r}
-#Ejemplo 2
 #Cálculo estadístico del ancho de banda efectivo de la traza
-l<-138.185 #bytes por segundo
-var<-89.668^2 # varianza 
-H<-0.81
-t<-(seq(length=100, from=0.0001, to=10))    #time parameter (ms)
-s<-(seq(length=100, from=0.00001, to=0.01)) #space parameter (bytes^-1)
+t<-log10(seq(length=100, from=1, to=200))    #time parameter (ms)
+s<-log10(seq(length=100, from=1, to=5)) #space parameter (bytes^-1)
 
-````
-
-Los ejes tienen escala logarítmica (base 10) con s en unidades de $bytes^-1$, t en segundos y $\alpha(s,t)$ en bytes por segundo.
-
-````{r}
-Bw<-function(t,s) {log10(l+((((o^2)*(t^((2*H)-1)))/2)*s))}   
-z<-outer(t,s,Bw) # La función outer evalua la función Bw en cada punto(si,tj)
+Bw<-function(t,s) {u+(((s*var)/2)*(t^(2*H-1)))}   
+z<-outer(t,s,Bw) # La función outer evalua la función Bw en cada punto (si,tj)
 
 persp((t),(s),(z),theta=20,phi=-0,col ="lightblue", sub="Ancho de Banda Efectivo de un proceso con movimiento fractal browniano"
       ,ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
 ````
 
+````{r}
+#Cálculo estadístico del ancho de banda efectivo de la traza
+C<-37
+u<-35.09
+var<-25.53
+H<-0.75
+B<-(seq(length=50, from=1, to=100))
+
+time<-function(C,B) {(B/(C-u))*(H/(1-H))}   
+t<-outer(C,B,time) #time parameter (ms)
+t<-log10(as.numeric(t))
+
+space<-function(C,B) {(B+(C-u)*t)/(var*t^(2*H))}   
+s<-outer(C,B,space) #space parameter (bytes^-1)
+s<-(as.numeric(s))
+````
+
+Los ejes tienen escala logarítmica (base 10) con s en unidades de $bytes^-1$, t en segundos y $\alpha(s,t)$ en bytes por segundo.
+
+````{r}
+#Bw<-function(t,s) {(u+(((s*var)/2)*(t^(2*H-1))))}   
+#z<-outer(t,s,Bw) # La función outer evalua la función Bw en cada punto(si,tj)
+
+#persp((t),(s),(z),theta=20,phi=-0,col ="lightblue", sub="Ancho de Banda Efectivo de un proceso con movimiento fractal browniano"
+#      ,ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
+````
+
+persp3d((t),(s),(z),theta=20,phi=-0,col ="green", front="lines", sub="Ancho de Banda Efectivo de un proceso con movimiento fractal browniano"
+      ,ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
 
 
 ##Procesos de Colas pesadas, autosimilares y LRD
@@ -286,7 +318,22 @@ abline(v=NULL,h=400,lty=3,col="green")
 abline(v=NULL,h=35,lty=3,col="green")
 ````
 
-Considerando los parámetros:
+Considerando los parámetros siguientes parámetros:
+
+````{r}
+#Parámetros de la población
+summary(belly)
+#Media
+#Varianza
+#Desviación Típica
+
+#Parámetros de la muestra
+summary(set_belly)
+#Media
+#Varianza
+#Desviación Típica
+````
+
 Taza promedio de arribo $\hat{\mu} = 1.591$
 Varianza de la taza de arribo $\hat{\theta^2} = 4.169$
 
@@ -323,65 +370,27 @@ x<-ethernetTraffic
 summary(x)
 ````
 
-1.Aggregated variance method
-
-![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/absvalFit.png)
-
-2.Differenced aggregated variance method
-
-![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/diffvarFit.png)
-
-3.Aggregated absolute value (moment) method
-
-![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/absvalFit.png)
-
-4.Higuchi’s or fractal dimension method
-
-![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/absvalFit.png)
-
-5. Peng’s or variance of residuals method
-
-![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/pengFit.png)
-
-6. R/S Rescaled Range Statistic method
+R/S Rescaled Range Statistic method
 
 ![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/rsFit.png)
 
-7. Periodogram method
-
-![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/perFit.png)
-
-8. WaveletFit wavelet estimator
-
-![Alt text](C:/Users/NataliaA/Documents/DataR/Hurts/waveletFit.png)
-
-
-Tomando como referencia los siguientes parámetros se obtiene:
-Calculando el ancho de banda:
+Tomando como referencia los siguientes parámetros se calcula el ancho de banda:
 
 ````{r}
 C<-2.9
 B<-0.3
 u<-1.591
 var<-4.169
-H<-0.8
+H<-0.7164
 
 t<-(B/(C-u))*(H/(1-H))      
-s<-(B+(C+u)*t)/(var*t^(2*H)) 
-
+s<-(B+(C-u)*t)/(var*t^(2*H)) 
 
 Bw_MFB<-u+(((s*var)/2)*(t^(2*H-1)))
 Bw_MFB
 ````
 
-Se obtiene una mejor aproximación con el modelo frantal browniano para la traza de datos ya que el valor del ancho de banda efectivo de la traza es superior a la taza promedio de arribo.
-
-````{r}
-set<-plot(set_bellx,set_belly,type="l",xlab="time (ms)",ylab="Packets",
-          main="Muestra Bellcore trace", ylim=c(0,500))
-abline(v=NULL,h=400,lty=3,col="red")
-abline(v=NULL,h=159,lty=3,col="blue")
-````
+Se obtiene una mejor aproximación con el modelo fractal browniano para la traza de datos ya que el valor del ancho de banda efectivo de la traza es superior a la taza promedio de arribo.
 
 
 ##Ancho de banda efectivo para una fuente de video MPEG
@@ -425,36 +434,27 @@ d<-0.5      #seconds
 b<-40000    #bits
 
 time<-(seq(length=100, from=1, to=20))    #time parameter (ms)
-space<-(seq(length=100, from=1, to=20)) #space parameter (bytes^-1)
+space<-(seq(length=100, from=2.8, to=20)) #space parameter (bytes^-1)
 
 t<-time
-s<-(space)
+s<-((space))
 ````
 
-Los ejes tienen escala logarítmica (base 10) con s en unidades de $bytes^-1$, t en segundos y $\alpha(s,t)$ en bytes por segundo.
+Los ejes tienen escala doble logarítmica con s en unidades de $bytes^-1$, t en segundos y $\alpha(s,t)$ en bytes por segundo.
 
-````{r}
-Bwmpeg<-function(t,s) {((b/t)*floor(t/d))+((1/(s*t))*log10(1+((t/d)-floor(t/d))*(exp(b*s)-1)))}   
+
+Bwmpeg<-function(t,s) {l+((b/t)*floor(t/d))+((1/(s*t))*log10(1+((t/d)-floor(t/d))*(exp(b*s)-1)))}   
 
 z<-outer(t,s,Bwmpeg) # La función outer evalua la función Bw en cada punto(si,tj)
 
-#persp((t),(s),(z),theta=20,phi=-0,col ="lightblue", sub="Ancho de Banda Efectivo de una traza de video MPEG-4"
-#      ,ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
-````
-
-````{r}
-#library(rgl)
-#persp3d((t),(s),(z),theta=20,phi=-0,col ="lightblue",ticktype ="detailed",front#="lines",xlab="t (ms)",ylab="s",zlab="(s,t)")  
-````
-
-##Análisis Estadístico de Tráfico Agregado
-###Tráfico agregado de video MPEG
-La generación de la agregación consiste en diferentes copias desfasadas de la secuencia de video original. 
+persp((t),(s),(z),theta=20,phi=-0,col ="lightblue", 
+      sub="Ancho de Banda Efectivo de una traza de video MPEG-4"
+      ,ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
 
 
-
-
-
+library(rgl)
+persp3d((t),(s),(z),theta=20,phi=-0,col ="lightblue",ticktype ="detailed",
+        front="lines",xlab="t (ms)",ylab="s",zlab="(s,t)")  
 
 
 ##Referencias

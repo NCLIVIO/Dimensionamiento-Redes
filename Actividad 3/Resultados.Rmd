@@ -1,0 +1,44 @@
+---
+title: "Simulaciones y Resultados"
+author: "Natalia Clivio"
+date: '2015'
+output: word_document
+---
+#Análisis de Trazas Reales
+
+##Tráfico de Internet Residencial
+
+```{r}
+library(ggplot2)
+
+dataset<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/Datos/Bitrate+for+CM_week.csv",
+                  header=TRUE,sep=";",na.strings="NA",dec=".")
+
+d<-as.character(dataset$Date)
+t<-as.character(dataset$Time)
+time<-data.frame(d,t)
+time<-paste(time$d,time$t,sep=" ")
+
+Date<-strptime(time,"%m/%d/%Y %H:%M")
+
+DS<-data.frame("Date"=Date,"DS_Kbps"=dataset$DS.bps/1000)
+
+plot(DS,type="l",col="blue",xlab="time (h)",ylab="Downstream (Kbps)",
+     main="Tráfico de un usuario residencial 6 Mbps")
+abline(v=NULL,h=2000,lty=3,col="gray")
+abline(v=NULL,h=4000,lty=3,col="gray")
+abline(v=NULL,h=6000,lty=3,col="gray")
+````
+
+Los parámetros de la traza son:
+
+````{r}
+summary(DS$DS_Kbps)
+
+C<-
+B<-
+u<-692.9
+var<-
+H<-
+````
+

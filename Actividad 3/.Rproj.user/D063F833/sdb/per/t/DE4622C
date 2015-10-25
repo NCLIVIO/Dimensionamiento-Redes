@@ -1,0 +1,17 @@
+{
+    "contents" : "---\ntitle: \"Estimación estadística del Ancho de Banda Efectivo\"\nauthor: \"Natalia Clivio\"\ndate: '2015'\noutput: word_document\nheader-includes: -\\usepackage[utf8]{inputenc} - \\usepackage{dcolumn}\n---\n\n````{r}\n   library(fArma)\nlibrary(longmemo)\n\ndata(ethernetTraffic)\nx<-ethernetTraffic\n\nrsFit(x, levels = 50, minnpts = 3, cut.off = 10^c(0.7, 2.5),\n      doplot = TRUE, trace = FALSE, title = NULL, description = NULL)\n ````     \n   ",
+    "created" : 1444602722110.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "191063065",
+    "id" : "DE4622C",
+    "lastKnownWriteTime" : 1445719385,
+    "path" : "~/GitHub/Dimensionamiento-Redes/Actividad 3/Borrador.Rmd",
+    "project_path" : "Borrador.Rmd",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_markdown"
+}
