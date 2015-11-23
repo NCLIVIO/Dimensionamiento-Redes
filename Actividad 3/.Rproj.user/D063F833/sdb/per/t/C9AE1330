@@ -6,12 +6,13 @@
     "folds" : "",
     "hash" : "3774475061",
     "id" : "C9AE1330",
-    "lastKnownWriteTime" : 1445732578,
+    "lastKnownWriteTime" : 1445743558,
     "path" : "~/GitHub/Dimensionamiento-Redes/Actividad 3/Trafico_Ethernet.Rmd",
     "project_path" : "Trafico_Ethernet.Rmd",
     "properties" : {
         "tempName" : "Untitled1"
     },
+    "relative_order" : 3,
     "source_on_save" : false,
     "type" : "r_markdown"
 }

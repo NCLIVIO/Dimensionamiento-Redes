@@ -1,17 +1,18 @@
 {
-    "contents" : "---\ntitle: \"Simulaciones y Resultados\"\nauthor: \"Natalia Clivio\"\ndate: '2015'\noutput: word_document\n---\n#Análisis de Trazas Reales\n\n##Tráfico de Internet Residencial\n\n```{r}\nlibrary(ggplot2)\n\ndataset<-read.csv(\"C:/Users/NataliaA/Documents/Maestria/Tráfico L3/Datos/Bitrate+for+CM_week.csv\",\n                  header=TRUE,sep=\";\",na.strings=\"NA\",dec=\".\")\n\nd<-as.character(dataset$Date)\nt<-as.character(dataset$Time)\ntime<-data.frame(d,t)\ntime<-paste(time$d,time$t,sep=\" \")\n\nDate<-strptime(time,\"%m/%d/%Y %H:%M\")\n\nDS<-data.frame(\"Date\"=Date,\"DS_Kbps\"=dataset$DS.bps/1000)\n\nplot(DS,type=\"l\",col=\"blue\",xlab=\"time (h)\",ylab=\"Downstream (Kbps)\",\n     main=\"Tráfico de un usuario residencial 6 Mbps\")\nabline(v=NULL,h=2000,lty=3,col=\"gray\")\nabline(v=NULL,h=4000,lty=3,col=\"gray\")\nabline(v=NULL,h=6000,lty=3,col=\"gray\")\n````\n\nLos parámetros de la traza son:\n\n````{r}\nsummary(DS$DS_Kbps)\n\nC<-\nB<-\nu<-692.9\nvar<-\nH<-\n````\n\n",
+    "contents" : "---\ntitle: \"Simulaciones y Resultados\"\nauthor: \"Natalia Clivio\"\ndate: '2015'\noutput: word_document\n---\n#Análisis de Trazas Reales\n\n##Tráfico de Internet Residencial\n\n```{r}\nlibrary(ggplot2)\n\ndata<-read.csv(\"C:/Users/NataliaA/Documents/Maestria/Tráfico L3/Datos/Bitrate+for+CM_week.csv\",\n                  header=TRUE,sep=\";\",na.strings=\"NA\",dec=\".\")\n\ndataset<-data.frame(data[1],data[2],data[3],data[4])\n\nd<-as.character(dataset$Date)\nt<-as.character(dataset$Time)\ntime<-data.frame(d,t)\ntime<-paste(time$d,time$t,sep=\" \")\nDate<-strptime(time,\"%m/%d/%Y %H:%M\")\n\nDS_data<-as.character(dataset$DS.bps)\nDS_Kbps<-as.numeric(DS_data)/1000\n\nDS<-data.frame(\"Date\"=Date,\"DS_Kbps\"=DS_Kbps)\n\nplot(DS,type=\"l\",col=\"blue\",xlab=\"time (h)\",ylab=\"Downstream (Kbps)\",\n     main=\"Tráfico de un usuario residencial 6 Mbps\")\nabline(v=NULL,h=2000,lty=3,col=\"gray\")\nabline(v=NULL,h=4000,lty=3,col=\"gray\")\nabline(v=NULL,h=6000,lty=3,col=\"gray\")\n````\n\nLos parámetros de la traza son:\n\n````{r}\nsummary(DS$DS_Kbps)\n\nC<-\nB<-\nu<-417.8 #Kbps\nvar<-\nH<-\n````\n\n",
     "created" : 1439144992278.000,
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "879980175",
+    "hash" : "3115176853",
     "id" : "DD3D045F",
-    "lastKnownWriteTime" : 1445732527,
+    "lastKnownWriteTime" : 1446313727,
     "path" : "~/GitHub/Dimensionamiento-Redes/Actividad 3/Resultados.Rmd",
     "project_path" : "Resultados.Rmd",
     "properties" : {
         "tempName" : "Untitled1"
     },
+    "relative_order" : 4,
     "source_on_save" : false,
     "type" : "r_markdown"
 }

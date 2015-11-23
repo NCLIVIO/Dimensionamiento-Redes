@@ -143,12 +143,12 @@ Calculando el punto crítico **(s,t)**
 pi1<-l/(l+u)
 pi2<-u/(l+u)
 
-space<-seq(length=50, from=1, to=300) #0.5 to 5 0 to 4000
+space<-seq(length=50, from=1, to=100) #0.5 to 5 0 to 4000
 time<-seq(length=50, from=0, to=30) #ms 1 to 30 1 to 20
 s<-log10(space)
 t<-(time)
 
-Bw<-function(t,s) {(1/s)*log(pi2+(exp((h*s))*pi1))}   
+Bw<-function(t,s) {(1/s)*log10(pi2+(exp((h*s))*pi1))}   
 z<-outer(t,s,Bw) # La función outer evalua la función Bw en cada punto (si,tj)
 ````
 
@@ -274,7 +274,6 @@ persp3d((t),(s),(z),theta=20,phi=-0,col ="green", front="lines", sub="Ancho de B
       ,ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
 
 
-##Procesos de Colas pesadas, autosimilares y LRD
 ####$\alpha$-Stable Farima 
 Este modelo se usa en el estudio de las redes modernas de tráfico,con tendencia a incrementos con colas pesadas y procesos de dependencia de rango largo.
 
@@ -304,6 +303,63 @@ Bw_MB
 
 El valor esperado es que el ancho de banda efectivo sea sustancialmente mayor que la taza promedio de arribo, por lo tanto se debería usar otro estimador para hacer el cálculo.
 
+Para un modelo F-Arima con las siguientes características:
+
+````{r}
+library(fArma)
+
+a<-farimaTrueacf(n = 100, H = 0.7)
+b<-farimaTruefft(n = 100, H = 0.7)
+farimaStatsSlider() #Una pantalla automática de las anteriores funciones
+
+c<-farimaSim(n = 1000, model = list(ar = c(0.5, -0.5), d = 0.3, ma = 0.1),
+    method = c("freq", "time"), ...) 
+
+ function(n = 1000, model = list(ar = c(0.5, -0.5), d = 0.3, ma = 0.1),
+
+                    method = c("freq", "time"), ...)
+# Parameters:
+n = 3000
+d = 0.2
+H = d + 0.5
+set.seed(1953)
+x = farimaSim(n, model = list(d = 0.2))
+plot(x, main="F-Arima Model (p,d,q)")
+
+# Sample and True ACF:
+	acf(x, main = "FARIMA: ACF")
+	y = farimaTrueacf(41, H)
+	points(0:40, y, col = "red")
+	###
+	
+	# Simple - Fit Hurst Exponent from True ACF:
+	coef = lsfit(x = log(1:40), y = log(y[-1]))$coef
+	beta = coef[[2]]
+	H.estimated = (beta+2)/2
+	H.estimated
+	###
+	
+	# Sample and True Spectrum:
+	s = spectrum(x, plot = FALSE)$spec
+	plot(s, type = "h", ylim = c(0, 60), main = "FARIMA: Spectrum")
+	y = Re(farimaTruefft(n, H))
+	lines(0:(n/2-1), y[1:(n/2)], col = "red")
+	###
+	
+	# Double Logarithmic Plot:
+	plot(log(1:length(s)), log(s), type = "l", main = "log-log Spectrum")
+	lines(log(1:(n/2)), log(y[1:(n/2)]), col = "red")
+	###
+	
+	# Simple Fit - Hurst Exponent from True Spectrum:
+	coef = lsfit(x = log(1:length(s)), y = log(s))$coef
+	beta = coef[[2]]
+	H = (1-beta)/2
+	H
+	###
+````
+
+
 ##Ancho de banda efectivo para una fuente de Tráfico Ethernet
 ###Traza Bellcore
 Para este análisis se considera una muestra de los primeros 512 segundos que corresponden a 1025 bytes por segundo
@@ -322,8 +378,9 @@ Considerando los parámetros siguientes parámetros:
 
 ````{r}
 #Parámetros de la población
-summary(belly)
+m<-summary(belly, Mean)
 #Media
+l<-mean(belly)/100
 #Varianza
 #Desviación Típica
 
@@ -345,6 +402,8 @@ El flujo tiene una taza de servicio de C=2.9, un buffer de tamaño B=0.3 (300 By
 Calculando el punto crítico $\boldsymbol{\alpha(s,t)}$, que está determinado:
 
 ````{r}
+#Muestra en Kbps
+
 C<-2.9
 B<-0.3
 u<-1.591
@@ -355,6 +414,8 @@ t<-B/(C-u)
 
 Bw_MB<-u+((s*var)/2)
 Bw_MB
+
+
 
 ````
 
@@ -368,7 +429,15 @@ library(longmemo)
 data(ethernetTraffic)
 x<-ethernetTraffic
 summary(x)
+
+RS<-rsFit(x, levels = 50, minnpts = 3, cut.off = 10^c(0.7, 2.5),
+      doplot = TRUE, trace = FALSE, title = NULL, description = NULL)
+
+H<-data.frame(RS@hurst)$H[1]
+
+
 ````
+
 
 R/S Rescaled Range Statistic method
 
@@ -380,11 +449,13 @@ Tomando como referencia los siguientes parámetros se calcula el ancho de banda:
 C<-2.9
 B<-0.3
 u<-1.591
-var<-4.169
+var<-0.4350589  
 H<-0.7164
 
 t<-(B/(C-u))*(H/(1-H))      
 s<-(B+(C-u)*t)/(var*t^(2*H)) 
+t
+s
 
 Bw_MFB<-u+(((s*var)/2)*(t^(2*H-1)))
 Bw_MFB
@@ -392,6 +463,152 @@ Bw_MFB
 
 Se obtiene una mejor aproximación con el modelo fractal browniano para la traza de datos ya que el valor del ancho de banda efectivo de la traza es superior a la taza promedio de arribo.
 
+##**Intervalo de Confianza del Ancho de Banda**
+### Movimiento Browniano
+````{r}
+set_belly
+dataKb<-belly/100
+summary(set_belly)
+u<-mean(dataKb)
+var<-var(dataKb)
+
+C<-2.9
+B<-0.3
+
+s<-(2*(C-u))/var
+t<-B/(C-u)
+
+Bw_MB<-u+((s*var)/2)
+Bw_MB
+
+Bw_MB <- function(s,u) 
+{    m <- mean(d$hours[i])
+n <- length(i)
+v <- (n-1)*var(d$hours[i])/n^2
+c(m, v)
+}
+
+
+B_MB<-boot(dataKb,Bw_MB,R=100)
+
+C<-37
+B<-5
+u<-35.09
+var<-25.53
+
+H<-0.7164
+u<-mean(dataKb)
+var<-var(dataKb)
+u
+var
+
+> u
+[1] 1.590584
+> var
+[1] 0.435058
+
+C<-2.9
+B<-0.3
+
+> t
+[1] 0.5789365
+> s
+[1] 5.320707
+
+u+(((s*var)/2)*(t^(2*H-1)))
+
+
+t<-log10(seq(length=100, from=1, to=100))    #time parameter (ms)
+s<-log10(seq(length=100, from=1, to=254000)) #space parameter (bytes^-1)
+
+Bw<-function(t,s) {u+(((s*var)/2)*(t^(2*H-1)))}   
+z<-outer(t,s,Bw) # La función outer evalua la función Bw en cada punto (si,tj)
+
+persp((t),(s),(z),theta=20,phi=-0,col ="lightblue", sub="Ancho de Banda Efectivo de un proceso con movimiento fractal browniano"
+      ,ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
+
+Bwboot<-boot(dataKb,Bw,R=100)
+boot.ci(Bwboot, type = "all")
+
+normalci<-u+c(-1,1)*qnorm(0.95)*sqrt(var)/512
+normalci
+
+````
+
+
+###Movimiento FraccionalBrowniano
+````{r}
+C<-2.9
+B<-0.3
+u<-1.591
+var<-0.4350589  
+H<-0.7164
+n<-512
+
+t<-(B/(C-u))*(H/(1-H))      
+s<-(B+(C-u)*t)/(var*t^(2*H)) 
+t
+s
+
+Bw_MFB<-u+(((s*var)/2)*(t^(2*H-1)))
+Bw_MFB
+
+t<-log10(seq(length=100, from=1, to=100))    #time parameter (ms)
+s<-log10(seq(length=100, from=1, to=254000)) #space parameter (bytes^-1)
+
+Bw<-function(t,s) {u+(((s*var)/2)*(t^(2*H-1)))}   
+z<-outer(t,s,Bw) # La función outer evalua la función Bw en cada punto (si,tj)
+
+persp((t),(s),(z),theta=20,phi=-0,col ="lightblue", sub="Ancho de Banda Efectivo de un proceso con movimiento fractal browniano"
+      ,ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
+
+persp((t),(s),(z),theta=20,phi=-0,col =cm.colors(100), sub="Ancho de Banda Efectivo de un proceso con movimiento fractal browniano"
+      ,ticktype ="simple",xlab="t (ms)",ylab="s",zlab="(s,t)") 
+
+dataBw<-u+(((s*var)/2)*(t^(2*H-1)))
+sd<-sqrt((1/(n-1)*(sum((dataBw-Bw_MFB)^2))))
+
+
+normalci<-Bw_MFB+c(-1,1)*qnorm(0.95)*sd/sqrt(n)
+normalci
+
+n
+
+
+````
+
+### Procesos LDR 
+####F-ARIMA(p,d,q)
+
+````{r}
+#Simulación procesos LDR
+
+#Población
+dataKb<-belly/100
+summary(dataKb)
+#Muestra 512
+summary(set_belly)
+
+p<-max(dataKb)  #taza pico de la traza
+l<-mean(dataKb) #taza promedio de tráfico
+var<-var(dataKb)#Varianza de la traza
+
+H<-data.frame(RS@hurst)$H[1]  #Parámetro Hurst de la traza
+b<-(p-l)/var                  #Medida de ráfagas (burstiness)
+
+plot(dataKb, type="l",ylim=c(0,4.70),xlab="time",ylab="Kbps")
+text(3000,4.50,"b=6.710393, H=0.7164")
+
+util<-0.95    #Parámetro de utilización 0<p<1
+
+n = 3000
+d = H - 0.5
+
+set.seed(1953)
+f = farimaSim(n, model = list(d = 0.2))
+plot(f, main="F-Arima Model (p,d,q)")
+	
+````
 
 ##Ancho de banda efectivo para una fuente de video MPEG
 ###Traza MPEG 4 

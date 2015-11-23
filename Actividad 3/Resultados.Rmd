@@ -11,17 +11,21 @@ output: word_document
 ```{r}
 library(ggplot2)
 
-dataset<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/Datos/Bitrate+for+CM_week.csv",
+data<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/Datos/Bitrate+for+CM_week.csv",
                   header=TRUE,sep=";",na.strings="NA",dec=".")
+
+dataset<-data.frame(data[1],data[2],data[3],data[4])
 
 d<-as.character(dataset$Date)
 t<-as.character(dataset$Time)
 time<-data.frame(d,t)
 time<-paste(time$d,time$t,sep=" ")
-
 Date<-strptime(time,"%m/%d/%Y %H:%M")
 
-DS<-data.frame("Date"=Date,"DS_Kbps"=dataset$DS.bps/1000)
+DS_data<-as.character(dataset$DS.bps)
+DS_Kbps<-as.numeric(DS_data)/1000
+
+DS<-data.frame("Date"=Date,"DS_Kbps"=DS_Kbps)
 
 plot(DS,type="l",col="blue",xlab="time (h)",ylab="Downstream (Kbps)",
      main="Tráfico de un usuario residencial 6 Mbps")
@@ -37,7 +41,7 @@ summary(DS$DS_Kbps)
 
 C<-
 B<-
-u<-692.9
+u<-417.8 #Kbps
 var<-
 H<-
 ````

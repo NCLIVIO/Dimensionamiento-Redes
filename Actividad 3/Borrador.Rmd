@@ -7,13 +7,13 @@ header-includes: -\usepackage[utf8]{inputenc} - \usepackage{dcolumn}
 ---
 
 ````{r}
-   library(fArma)
-library(longmemo)
+library(fArma)
 
-data(ethernetTraffic)
-x<-ethernetTraffic
-
-rsFit(x, levels = 50, minnpts = 3, cut.off = 10^c(0.7, 2.5),
-      doplot = TRUE, trace = FALSE, title = NULL, description = NULL)
+n = 3000
+d = 0.2
+H = d + 0.5
+set.seed(1953)
+x = farimaSim(n, model = list(d = 0.2))
+plot(x, main="F-Arima Model (p,d,q)")
  ````     
    
