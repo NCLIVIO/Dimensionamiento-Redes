@@ -1,12 +1,12 @@
 {
-    "contents" : "---\ntitle: \"Estimación estadística del Ancho de Banda Efectivo\"\nauthor: \"Natalia Clivio\"\ndate: '2015'\noutput: word_document\nheader-includes: -\\usepackage[utf8]{inputenc} - \\usepackage{dcolumn}\n---\n\n````{r}\nlibrary(fArma)\n\nn = 3000\nd = 0.2\nH = d + 0.5\nset.seed(1953)\nx = farimaSim(n, model = list(d = 0.2))\nplot(x, main=\"F-Arima Model (p,d,q)\")\n ````     \n   ",
+    "contents" : "---\ntitle: \"Estimación estadística del Ancho de Banda Efectivo\"\nauthor: \"Natalia Clivio\"\ndate: '2015'\noutput: word_document\nheader-includes: -\\usepackage[utf8]{inputenc} - \\usepackage{dcolumn}\n---\n\n\n\nCalculando el punto crítico **(s,t)**\n\n````{r}\nmpeg<-read.csv(\"C:/Users/NataliaA/Documents/Maestria/Tráfico L3/MPEG/Verbose_StarWarsIV.dat\",header=FALSE,sep=\"\",na.strings=\"NA\",dec=\".\",skip=2)\n\nsetmpeg<-data.frame(No=mpeg$V1,Type=mpeg$V2,\"time_ms\"=mpeg$V3,byte=mpeg$V4)\nIset<-subset(setmpeg,Type==\"I\")\n\na<-subset(Iset,byte>4000)\nl<-2209   #Q Transiciones del estado 0 a h (ON)\nu<-7499  #Q Transiciones que salen del estado 0 (OFF)\nh<-(7913*8)/1000  #Pico de la Traza (Kbps) 7913\n\n````\n\n````{r}\npi1<-l/(l+u)\npi2<-u/(l+u)\n\nspace<-seq(length=100, from=1, to=100) \ntime<-seq(length=100, from=1, to=30) \ns<-log10(space)\nt<-log10(time)\n\nBw<-function(t,s) {(1/s)*log10(pi2+(exp((h*s))*pi1))}   \nz<-outer(t,s,Bw) # La función outer evalua la función Bw en cada punto (si,tj)\n\npersp(t,s,z,theta=20,phi=-0,col =\"orange\"\n      ,ticktype =\"detailed\",xlab=\"t (ms)\",ylab=\"s\",zlab=\"(s,t)\") \n\n````{r}\n\nset<-read.csv(\"C:/Users/NataliaA/Documents/Maestria/Tráfico L3/VoIP/Subs_Voip.txt\",header=TRUE,sep=\",\",na.strings=\"NA\",dec=\".\")\nset30<-sample(set$MAC.Voip,size =30,replace =FALSE )\nset30\n",
     "created" : 1444602722110.000,
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "1778575321",
+    "hash" : "530658290",
     "id" : "DE4622C",
-    "lastKnownWriteTime" : 1448216038,
+    "lastKnownWriteTime" : 1462843449,
     "path" : "~/GitHub/Dimensionamiento-Redes/Actividad 3/Borrador.Rmd",
     "project_path" : "Borrador.Rmd",
     "properties" : {

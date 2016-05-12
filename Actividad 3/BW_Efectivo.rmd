@@ -130,7 +130,7 @@ H
 ````
 
 ````{r}
-BWEonoff<-(u*l*h^2)/(l+u)^2
+BWEonoff<-(u*l*h^2)/(l+u)^2 #veroficar porque no se de donde sale esta eq
 BWEonoff
 ````
 
@@ -272,7 +272,10 @@ Los ejes tienen escala logarítmica (base 10) con s en unidades de $bytes^-1$, t
 
 persp3d((t),(s),(z),theta=20,phi=-0,col ="green", front="lines", sub="Ancho de Banda Efectivo de un proceso con movimiento fractal browniano"
       ,ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
-
+      
+persp3d(t,s,z,theta=-30,phi=0,col = "tomato",front="lines", 
+sub="Ancho de Banda Efectivo de un proceso con movimiento fractal browniano",
+ticktype = "detailed",xlab="time (ms)",ylab="space (s)",zlab="(s,t)")
 
 ####$\alpha$-Stable Farima 
 Este modelo se usa en el estudio de las redes modernas de tráfico,con tendencia a incrementos con colas pesadas y procesos de dependencia de rango largo.
@@ -318,7 +321,8 @@ c<-farimaSim(n = 1000, model = list(ar = c(0.5, -0.5), d = 0.3, ma = 0.1),
  function(n = 1000, model = list(ar = c(0.5, -0.5), d = 0.3, ma = 0.1),
 
                     method = c("freq", "time"), ...)
-# Parameters:
+# Parameters (2,d,1):
+#p=length(ar) and q=length(ma) and d is a fractional value
 n = 3000
 d = 0.2
 H = d + 0.5
@@ -378,7 +382,7 @@ Considerando los parámetros siguientes parámetros:
 
 ````{r}
 #Parámetros de la población
-m<-summary(belly, Mean)
+summary.(belly)
 #Media
 l<-mean(belly)/100
 #Varianza
@@ -653,13 +657,13 @@ b<-40000    #bits
 time<-(seq(length=100, from=1, to=20))    #time parameter (ms)
 space<-(seq(length=100, from=2.8, to=20)) #space parameter (bytes^-1)
 
-t<-time
-s<-((space))
+t<-log(time)
+s<-log(log(space))
 ````
 
 Los ejes tienen escala doble logarítmica con s en unidades de $bytes^-1$, t en segundos y $\alpha(s,t)$ en bytes por segundo.
 
-
+````{r}
 Bwmpeg<-function(t,s) {l+((b/t)*floor(t/d))+((1/(s*t))*log10(1+((t/d)-floor(t/d))*(exp(b*s)-1)))}   
 
 z<-outer(t,s,Bwmpeg) # La función outer evalua la función Bw en cada punto(si,tj)
@@ -667,7 +671,7 @@ z<-outer(t,s,Bwmpeg) # La función outer evalua la función Bw en cada punto(si,
 persp((t),(s),(z),theta=20,phi=-0,col ="lightblue", 
       sub="Ancho de Banda Efectivo de una traza de video MPEG-4"
       ,ticktype ="detailed",xlab="t (ms)",ylab="s",zlab="(s,t)")  
-
+````
 
 library(rgl)
 persp3d((t),(s),(z),theta=20,phi=-0,col ="lightblue",ticktype ="detailed",
