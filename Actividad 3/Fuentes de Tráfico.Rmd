@@ -184,8 +184,8 @@ for (i in 1:30) {
   cat(i,"V",sep=",")
   }  
   
-u<-c(u1,u2,u3,u4,u5,u6,u7,u8,u9,u10,u11,u12,u13,u14,u15,u16,u17,u18,u19,u20,u21,u22,u23,u24,u25,u26,u27,u28,u29,u30)
-v<-c(V1,V2,V3,V4,V5,V6,V7,V8,V9,V10,V11,V12,V13,V14,V15,V16,V17,V18,V19,V20,V21,V22,V23,V24,V25,V26,V27,V28,V29,V30)
+u<-round(c(u1,u2,u3,u4,u5,u6,u7,u8,u9,u10,u11,u12,u13,u14,u15,u16,u17,u18,u19,u20,u21,u22,u23,u24,u25,u26,u27,u28,u29,u30),2)
+v<-round(c(V1,V2,V3,V4,V5,V6,V7,V8,V9,V10,V11,V12,V13,V14,V15,V16,V17,V18,V19,V20,V21,V22,V23,V24,V25,V26,V27,V28,V29,V30),2)
  
 tabla<-data.frame("Taza Arribo"=u,"Varianza Arribo"=v)
 tabla
@@ -196,8 +196,8 @@ calculando los parámetros temporal y espacial de cada traza
 ````{r}
 B<-0.150 
 
-t<-(B/(C-u))*(H/(1-H))      #time parameter (us)
-s<-(B+(C+u)*t)/(v*t^(2*H)) #space parameter (bitss^-1)
+t<-round((B/(C-u))*(H/(1-H)),2)      #time parameter (us)
+s<-round((B+(C+u)*t)/(v*t^(2*H)),2) #space parameter (bitss^-1)
 
 #t<-log10(seq(length=100, from=1, to=200))    #time parameter (us)
 #s<-log10(seq(length=100, from=1, to=5)) #space parameter (bits^-1)
@@ -206,7 +206,7 @@ s<-(B+(C+u)*t)/(v*t^(2*H)) #space parameter (bitss^-1)
 Por lo tanto el ancho de banda efectivo para cada traza es:
 
 ````{r}
-BWE<-u+(((s*v)/2)*(t^(2*H-1)))
+BWE<-round(u+(((s*v)/2)*(t^(2*H-1))),2)
 BWE
 
 datos<-data.frame("Taza_Arribo"=u,"Varianza_Arribo"=v,"time"=t,"space"=s,BWE)
@@ -216,7 +216,7 @@ datos
 El ancho de banda efectivo promedio para la fuente de datos es:
 
 ````{r}
-BWEmean<-mean(BWE)
+BWEmean<-round(mean(BWE),2)
 BWEmean
 ````
 
@@ -227,7 +227,7 @@ El intervalo de confianza, calculando el percentil 95 para el ancho de banda efe
 n<<-30
 sd<-sqrt((1/(n-1)*(sum((BWE-BWEmean)^2))))
 
-normalci<-BWEmean+c(-1,1)*qnorm(0.95)*sd/sqrt(n)
+normalci<-round(BWEmean+c(-1,1)*qnorm(0.95)*sd/sqrt(n),2)
 normalci
 ````
 
@@ -268,14 +268,14 @@ Pon<-data_VoD$Pon    #Propabilidad de estado ON
 Poff<-data_VoD$Poff  #Propabilidad de estado OFF
 
 s<-45
-BWE_onoff<-(1/s)*log10(Poff+(exp((h*s))*Pon))  
+BWE_onoff<-round((1/s)*log10(Poff+(exp((h*s))*Pon)),3)  
 BWE_onoff
 ````
 
 El ancho de banda efectivo promedio para la fuente de datos es:
 
 ````{r}
-BWEmean<-mean(BWE_onoff)
+BWEmean<-round(mean(BWE_onoff),3)
 BWEmean
 ````
 
@@ -286,7 +286,7 @@ El intervalo de confianza, calculando el percentil 95 para el ancho de banda efe
 n<<-30 #Cantidad de trazas muestreadas
 sd<-sqrt((1/(n-1)*(sum((BWE_onoff-BWEmean)^2))))
 
-normalci<-BWEmean+c(-1,1)*qnorm(0.95)*sd/sqrt(n)
+normalci<-round(BWEmean+c(-1,1)*qnorm(0.95)*sd/sqrt(n),3)
 normalci
 ````
 
@@ -308,12 +308,12 @@ Aplicando modelo ON-OFF
 Pon<-data_VoIP$Pon    #Propabilidad de estado ON
 Poff<-data_VoIP$Poff  #Propabilidad de estado OFF
 
-h<-8 #Kbps tasa pico
+h<-24 #Kbps tasa pico BW sobre IP con G729
 
 Pon<-mean(Pon)
 Poff<-mean(Poff)
 
-space<-seq(length=50, from=0.5, to=100)
+space<-seq(length=50, from=0.5, to=35)
 s<-(space)
 BWE_onoff<-(1/s)*log10(Poff+(exp((h*s))*Pon))   
 plot(BWE_onoff,s)
@@ -322,19 +322,19 @@ plot(BWE_onoff,s)
 De lo anterior se observa que s tiene un conportamiento asintótico
 
 ````{r}
-Pon<-data_VoD$Pon    #Propabilidad de estado ON
-Poff<-data_VoD$Poff  #Propabilidad de estado OFF
+Pon<-data_VoIP$Pon    #Propabilidad de estado ON
+Poff<-data_VoIP$Poff  #Propabilidad de estado OFF
 
-s<-88   #Antes de que el BWE se vuelva indeterminado
-BWE_onoff<-(1/s)*log10(Poff+(exp((h*s))*Pon))  
-BWE_onoff
+s<-29   #Antes de que el BWE se vuelva indeterminado
+BWE_onoff<-round((1/s)*log10(Poff+(exp((h*s))*Pon)),3)  
+BWE_onoff #[Kbps]
 ````
 
 El ancho de banda efectivo promedio para la fuente de datos es:
 
 ````{r}
-BWEmean<-mean(BWE_onoff)
-BWEmean
+BWEmean<-round(mean(BWE_onoff),3)
+BWEmean #[Kbps]
 ````
 
 
@@ -344,6 +344,6 @@ El intervalo de confianza, calculando el percentil 95 para el ancho de banda efe
 n<<-30 #Cantidad de trazas muestreadas
 sd<-sqrt((1/(n-1)*(sum((BWE_onoff-BWEmean)^2))))
 
-normalci<-BWEmean+c(-1,1)*qnorm(0.95)*sd/sqrt(n)
+normalci<-round(BWEmean+c(-1,1)*qnorm(0.95)*sd/sqrt(n),3)
 normalci  #[Kbps]
 ````
