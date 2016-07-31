@@ -1,0 +1,1532 @@
+---
+title: "Final Demand Forecast"
+author: "Natalia Clivio"
+date: '2016'
+output: word_document
+---
+
+
+#Load and clean data
+
+The file loaded is the telecommunication companies´s subscribers by ten years,
+for each service provided by this companies. The service offering are:
+Internet residential and business, Video on demand and VoIP.
+
+````{r}
+library(caret)
+library(forecast)
+library(growthmodels)
+
+subs<-read.csv("C:/Users/NataliaA/Documents/DataR/Subscribers_CV.csv",header=TRUE,
+               sep=";",na.strings="NA",dec=",")
+
+years<-na.exclude(subs[1])
+oper1<-na.exclude(subs[1:5]) #Subs operador 1
+oper2<-data.frame(years,na.exclude(subs[6:9])) #Subs operador 2
+oper3<-data.frame(years,na.exclude(subs[10:13])) #Subs operador 3
+````
+
+
+#Data Preparation
+````{r}
+year<-years$Year
+start<-year[1]
+hi<-dim(years)[1]
+end<-year[hi]
+year1<-year[round(hi*0.70)]
+
+seth<-8   ##Set predictions quantity
+f1<-end+1 #Q forecast
+f2<-end+5 #Q forecast
+
+time<-1:hi
+````
+
+
+#Demand Models for Internet  Residential Subscribers
+##1.1 Predicting with Growth curves InRes
+
+Simple random sampling of time series is probably not the best way to resample 
+times series data. Hyndman and Athanasopoulos (2013)) discuss rolling forecasting 
+origin techniques that move the training and test sets in time.
+
+````{r}
+#Operator1
+tssubs1<-ts(oper1$Internet_Res1,start=start,end=end) #Time serie
+tsset1<-tssubs1
+tstrain1<-window(tsset1,start=start,end=year1)      #Training and Testing data
+tstest1<-window(tsset1,start=year1,end=end)       
+
+#Operator2
+tssubs2<-ts(oper2$Internet_Res2,start=start,end=end) #Time serie
+tsset2<-tssubs2/1
+tstrain2<-window(tsset2,start=start,end=year1)        #Training and Testing data
+tstest2<-window(tsset2,start=year1,end=end)       
+
+#Operator3
+tssubs3<-ts(oper3$Internet_Res3,start=start,end=end) #Time serie
+tsset3<-tssubs3/1
+tstrain3<-window(tsset3,start=start,end=year1)        #Training and Testing data
+tstest3<-window(tsset3,start=year1,end=end)
+
+plot(tssubs1,main="Internet Residencial Mbps")
+lines(tstest1,col="red")
+legend("topleft",legend = c("Train set","Test set"), col=c("black","red"), lty = 1:2)
+````
+
+###Linear Model
+````{r}
+#Operator 1
+fitlm1<-tslm(tstrain1~trend)       #Model
+predlm1<-forecast(fitlm1, h=seth)  #Prediction
+#Operator 2
+fitlm2<-tslm(tstrain2~trend)       #Model
+predlm2<-forecast(fitlm2, h=seth)  #Prediction
+#Operator 3
+fitlm3<-tslm(tstrain3~trend)       #Model
+predlm3<-forecast(fitlm3, h=seth)  #Prediction
+````
+
+###Parabolic Model
+````{r}
+#Operator 1
+fitpar1=lm(tsset1 ~ time + I(time^2))  #Model
+predpar1<-predict(fitpar1)             #Prediction
+forepar1<-forecast(predpar1,h=seth-3)  #Forecast
+#Operator 2
+fitpar2=lm(tsset2 ~ time + I(time^2))  #Model
+predpar2<-predict(fitpar2)             #Prediction
+forepar2<-forecast(predpar2,h=seth-3)  #Forecast
+#Operator 3
+fitpar3=lm(tsset3 ~ time + I(time^2))  #Model 
+predpar3<-predict(fitpar3)             #Prediction
+forepar3<-forecast(predpar3,h=seth-3)  #Forecast
+````
+
+###Exponential Model
+`````{r}
+#Operator 1
+Yexp1=lm(log(tsset1) ~ time)          #Transform
+parmexp1<-as.list(Yexp1$coeff)
+betae1<- exp(parmexp1$"(Intercept)")  #growth range (a)
+ke1<- parmexp1$time                   #growth rate (b)
+fitexp1<-betae1*exp(ke1*time)         #Model
+predexp1<-forecast(fitexp1,h=seth-3)
+
+#Operator 2
+Yexp2=lm(log(tsset2) ~ time)          #Transform
+parmexp2<-as.list(Yexp2$coeff)
+betae2<- exp(parmexp2$"(Intercept)")  #growth range (a)
+ke2<- parmexp2$time                   #growth rate (b)
+fitexp2<-betae2*exp(ke2*time)         #Model
+predexp2<-forecast(fitexp2,h=seth-3)
+
+#Operator 3
+Yexp3=lm(log(tsset3) ~ time)          #Transform
+parmexp3<-as.list(Yexp3$coeff)
+betae3<- exp(parmexp3$"(Intercept)")  #growth range (a)
+ke3<- parmexp3$time                   #growth rate (b)
+fitexp3<-betae3*exp(ke3*time)         #Model
+predexp3<-forecast(fitexp3,h=seth-3)
+````
+
+###The predictions with growth curves are:
+
+````{r}
+#Operator 1
+set1a<-data.frame(predlm1)  #Linear predictions
+lma<-data.frame(Fore_Lin1=set1a$Point.Forecast[4:8])
+data_predlm1<-data.frame(Lin1=c(fitlm1$fitted.values,set1a$Point.Forecast[1:3]))
+#Operator 2
+set1b<-data.frame(predlm2)  #Linear predictions
+lmb<-data.frame(Fore_Lin2=set1b$Point.Forecast[4:8])
+data_predlm2<-data.frame(Lin2=c(fitlm2$fitted.values,set1b$Point.Forecast[1:3]))
+#Operator 3
+set1c<-data.frame(predlm3)  #Linear predictions
+lmc<-data.frame(Fore_Lin3=set1c$Point.Forecast[4:8])
+data_predlm3<-data.frame(Lin3=c(fitlm3$fitted.values,set1c$Point.Forecast[1:3]))
+
+
+#Operator 1
+data_predpar1<-data.frame(Par1=predpar1) #Parabolic predictions
+set2a<-data.frame(forepar1)
+para<-data.frame(Fore_Par1=set2a$Point.Forecast)
+#Operator 2
+data_predpar2<-data.frame(Par2=predpar2) #Parabolic predictions
+set2b<-data.frame(forepar2)
+parb<-data.frame(Fore_Par2=set2b$Point.Forecast)
+#Operator 3
+data_predpar3<-data.frame(Par3=predpar3) #Parabolic predictions
+set2c<-data.frame(forepar3)
+parc<-data.frame(Fore_Par3=set2c$Point.Forecast)
+
+
+#Operator 1
+set3a<-data.frame(predexp1)  #Exponential predictions
+expa<-data.frame(Fore_Exp1=set3a$Point.Forecast)
+data_predexp1<-data.frame(Exp1=fitexp1)
+#Operator 2
+set3b<-data.frame(predexp2)  #Exponential predictions
+expb<-data.frame(Fore_Exp2=set3b$Point.Forecast)
+data_predexp2<-data.frame(Exp2=fitexp2)
+#Operator 1
+set3c<-data.frame(predexp3)  #Exponential predictions
+expc<-data.frame(Fore_Exp3=set3c$Point.Forecast)
+data_predexp3<-data.frame(Exp3=fitexp3)
+
+
+##Sets of predictions
+data_pred1a<-data.frame(data_predlm1,data_predpar1,data_predexp1)  #Operator 1
+data_pred2a<-data.frame(data_predlm2,data_predpar2,data_predexp2)  #Operator 2
+data_pred3a<-data.frame(data_predlm3,data_predpar3,data_predexp3)  #Operator 3
+````
+
+###Forecasting for 5 Years are:
+````{r}
+fore1a<-data.frame(Year=f1:f2,lma,para,expa)   #Operator 1
+fore1b<-data.frame(lmb,parb,expb)              #Operator 2
+fore1c<-data.frame(lmc,parc,expc)              #Operator 3
+````
+
+
+##1.2 Predicting with Logistic and Gompertz Model InRes
+
+###Logistic Model
+Using the **growthmodels** package, with the *logistic* function to get the 
+logistic curve
+**Usage**
+logistic(t, alpha, beta, k)
+**Arguments**
+t time,x size, alpha upper asymptote, beta  growth range, k  growth rate
+
+````{r}
+#Operator 1
+alpha1<-tssubs1[hi] +0.5           #upper asymptote (M)
+Y1<-log(alpha1/tssubs1-1)          #Transform
+Reglm1<-tslm(Y1~trend)             #Lineal Regression
+parmlm1<-as.list(Reglm1$coeff)
+
+beta1<- exp(parmlm1$"(Intercept)")  #growth range (a)
+k1<- -parmlm1$trend                 #growth rate (b)
+fitlog1 <- logistic(1:10, alpha1, beta1, k1)
+predlog1<-forecast(fitlog1,h=seth)
+
+#Operator 2
+alpha2<-tssubs2[hi] +0.5           #upper asymptote (M)
+Y2<-log(alpha2/tssubs2-1)          #Transform
+Reglm2<-tslm(Y2~trend)             #Lineal Regression
+parmlm2<-as.list(Reglm2$coeff)
+
+beta2<- exp(parmlm2$"(Intercept)")  #growth range (a)
+k2<- -parmlm2$trend                 #growth rate (b)
+fitlog2 <- logistic(1:10, alpha2, beta2, k2)
+predlog2<-forecast(fitlog2,h=seth)
+
+#Operator 3
+alpha3<-tssubs3[hi] +0.5           #upper asymptote (M)
+Y3<-log(alpha3/tssubs3-1)          #Transform
+Reglm3<-tslm(Y3~trend)             #Lineal Regression
+parmlm3<-as.list(Reglm3$coeff)
+
+beta3<- exp(parmlm3$"(Intercept)")  #growth range (a)
+k3<- -parmlm3$trend                 #growth rate (b)
+fitlog3 <- logistic(1:10, alpha3, beta3, k3)
+predlog3<-forecast(fitlog3,h=seth)
+````
+
+The predictions using logistic model are:
+````{r}
+set4a<-data.frame(predlog1)
+alog<-set4a$Point.Forecast   #Operator 1 predictions
+set4b<-data.frame(predlog2)
+blog<-set4b$Point.Forecast   #Operator 2 predictions
+set4c<-data.frame(predlog3)
+clog<-set4c$Point.Forecast   #Operator 3 predictions
+
+data_predlog1<-data.frame(Log1=fitlog1)
+data_predlog2<-data.frame(Log2=fitlog2)
+data_predlog3<-data.frame(Log3=fitlog3)
+````
+
+###Gompertz Model
+Using the **growthmodels** package, Computes the Gompertz growth model
+**Usage**
+gompertz(t, alpha, beta, k)
+**Arguments**
+t     time
+x     size
+alpha upper asymptote
+beta  growth displacement
+k     growth rate
+
+````{r}
+#Operator 1
+alphag1<-tssubs1[hi] +5                 #upper asymptote (M)
+Y1g<-log(log(alphag1/tssubs1))          #Transform
+Reglmg1<-tslm(Y1g~trend)                #Lineal Regression
+parmglm1<-as.list(Reglmg1$coeff)
+
+betag1<- exp(parmglm1$"(Intercept)")  #growth range (a)
+kg1<- -parmglm1$trend                 #growth rate (b)
+fitgom1 <- gompertz(1:10, alphag1, betag1, kg1)
+predgom1<-forecast(fitgom1,h=seth)
+
+#Operator 2
+alphag2<-tssubs2[hi] +5                 #upper asymptote (M)
+Y2g<-log(log(alphag2/tssubs2))          #Transform
+Reglmg2<-tslm(Y2g~trend)                #Lineal Regression
+parmglm2<-as.list(Reglmg2$coeff)
+
+betag2<- exp(parmglm2$"(Intercept)")  #growth range (a)
+kg2<- -parmglm2$trend                 #growth rate (b)
+fitgom2 <- gompertz(1:10, alphag2, betag2, kg2)
+predgom2<-forecast(fitgom2,h=seth)
+
+#Operator 3
+alphag3<-tssubs3[hi] +5                 #upper asymptote (M)
+Y3g<-log(log(alphag3/tssubs3))          #Transform
+Reglmg3<-tslm(Y3g~trend)                #Lineal Regression
+parmglm3<-as.list(Reglmg3$coeff)
+
+betag3<- exp(parmglm3$"(Intercept)")  #growth range (a)
+kg3<- -parmglm3$trend                 #growth rate (b)
+fitgom3 <- gompertz(1:10, alphag3, betag3, kg3)
+predgom3<-forecast(fitgom3,h=seth)
+````
+
+The predictions using gompertz model are:
+````{r}
+set5a<-data.frame(predgom1)
+agom<-set5a$Point.Forecast   #Operator 1 predictions
+set5b<-data.frame(predgom2)
+bgom<-set5b$Point.Forecast   #Operator 2 predictions
+set5c<-data.frame(predgom3)
+cgom<-set5c$Point.Forecast   #Operator 3 predictions
+
+data_predgom1<-data.frame(Gom1=fitgom1)
+data_predgom2<-data.frame(Gom2=fitgom2)
+data_predgom3<-data.frame(Gom3=fitgom3)
+````
+
+###Forecasting for 5 years
+````{r}
+fore2a<-data.frame(Fore_Log1=alog[1:5],Fore_Gom1=agom[1:5])
+fore2b<-data.frame(Fore_Log2=blog[1:5],Fore_Gom1=bgom[1:5])
+fore2c<-data.frame(Fore_Log3=clog[1:5],Fore_Gom1=cgom[1:5])
+`````
+
+##1.3 Performance Models for Internet Residential
+
+Using the forecast package, the performance models are:
+**(ME)**:Mean Error 
+**(RMSE)**:Root Mean Square Error
+#**(MAE)**: Mean Absolute Error
+**(MPE)**: Mean Porcentual Error
+**(MAPE)**: Mean Absolute Porcentual Error
+
+````{r}
+#Modelo Lineal
+acc_d1<-accuracy(predlm1) #Operator 1
+acc_d2<-accuracy(predlm2) #Operator 2
+acc_d3<-accuracy(predlm3) #Operator 3
+
+#Modelo Parabólico
+acc_e1<-accuracy(predpar1,tsset1)  #Operator 1
+acc_e2<-accuracy(predpar2,tsset2)  #Operator 2
+acc_e3<-accuracy(predpar3,tsset3)  #Operator 3
+
+#Modelo Exponencial
+acc_f1<-accuracy(predexp1)  #Operator 1 
+acc_f2<-accuracy(predexp2)  #Operator 2 
+acc_f3<-accuracy(predexp3)  #Operator 3 
+
+#Modelo Logístico
+acc_g1<-accuracy(predlog1) #Operator 1 
+acc_g2<-accuracy(predlog2) #Operator 2 
+acc_g3<-accuracy(predlog3) #Operator 3 
+
+#Modelo Gompertz
+acc_h1<-accuracy(predgom1) #Operator 1 
+acc_h2<-accuracy(predgom2) #Operator 2 
+acc_h3<-accuracy(predgom3) #Operator 3 
+````
+
+The performance sets are:
+````{r}
+Models<-c("Linear","Parabolic","Exponential","Logistic","Gompertz")
+
+#Opereator 1 
+accd1<-acc_d1[1,1:5]  #Linear
+acce1<-acc_e1[1,1:5]  #Parabolic
+accf1<-acc_f1[1,1:5]  #Exponential
+accg1<-acc_g1[1,1:5]  #Logistic
+acch1<-acc_h1[1,1:5]  #Gompertz
+acc_all1b<-round(rbind(accd1,acce1,accf1,accg1,acch1),2)
+performIRes1<-data.frame(Models,acc_all1b)
+
+#Operator 2
+accd2<-acc_d2[1,1:5]
+acce2<-acc_e2[1,1:5]
+accf2<-acc_f2[1,1:5]
+accg2<-acc_g2[1,1:5]
+acch2<-acc_h2[1,1:5]
+acc_all2b<-round(rbind(accd2,acce1,accf1,accg1,acch1),2)
+performIRes2<-data.frame(Models,acc_all2b)
+
+#Operator 3
+accd3<-acc_d3[1,1:5]
+acce3<-acc_e3[1,1:5]
+accf3<-acc_f3[1,1:5]
+accg3<-acc_g3[1,1:5]
+acch3<-acc_h3[1,1:5]
+acc_all3b<-round(rbind(accd3,acce1,accf1,accg1,acch1),2)
+performIRes3<-data.frame(Models,acc_all3b)
+````
+
+##Predictions Reports
+###Internet Residential Predictions by service provider
+````{r}
+predIRes1<-data.frame(data_pred1a,data_predlog1,data_predgom1) #Operator 1 
+predIRes2<-data.frame(data_pred2a,data_predlog2,data_predgom2) #Operator 2 
+predIRes3<-data.frame(data_pred3a,data_predlog3,data_predgom3) #Operator 3 
+````
+
+###Forecast Reports
+Forecasting for 5 Years Internet Residential 
+````{r}
+foreIRes1<-data.frame(fore1a,fore2a)  #Operator 1
+foreIRes2<-data.frame(fore1b,fore2b)  #Operator 2
+foreIRes3<-data.frame(fore1c,fore2c)  #Operator 3
+````
+
+
+#Demand Models for Internet Bussines Subscribers
+
+##Preparation Data
+````{r}
+#Operator1
+tssubs1<-ts(oper1$Internet_Bus1,start=start,end=end) #Time serie
+tsset1<-tssubs1
+tstrain1<-window(tsset1,start=start,end=year1)        #Training and Testing data
+tstest1<-window(tsset1,start=year1,end=end)       
+
+#Operator2
+tssubs2<-ts(oper2$Internet_Bus2,start=start,end=end) #Time serie
+tsset2<-tssubs2/1
+tstrain2<-window(tsset2,start=start,end=year1)        #Training and Testing data
+tstest2<-window(tsset2,start=year1,end=end)       
+
+#Operator3
+tssubs3<-ts(oper3$Internet_Bus3,start=start,end=end) #Time serie
+tsset3<-tssubs3/1
+tstrain3<-window(tsset3,start=start,end=year1)        #Training and Testing data
+tstest3<-window(tsset3,start=year1,end=end)  
+````
+
+##2.1 Predicting with Growth curves InBus
+###Linear Model
+````{r}
+#Operator 1
+fitlm1<-tslm(tstrain1~trend)       #Model
+predlm1<-forecast(fitlm1, h=seth)  #Prediction
+#Operator 2
+fitlm2<-tslm(tstrain2~trend)       #Model
+predlm2<-forecast(fitlm2, h=seth)  #Prediction
+#Operator 3
+fitlm3<-tslm(tstrain3~trend)       #Model
+predlm3<-forecast(fitlm3, h=seth)  #Prediction
+````
+
+###Parabolic Model
+````{r}
+#Operator 1
+fitpar1=lm(tsset1 ~ time + I(time^2))  #Model
+predpar1<-predict(fitpar1)             #Prediction
+forepar1<-forecast(predpar1,h=seth-3)  #Forecast
+#Operator 2
+fitpar2=lm(tsset2 ~ time + I(time^2))  #Model
+predpar2<-predict(fitpar2)             #Prediction
+forepar2<-forecast(predpar2,h=seth-3)  #Forecast
+#Operator 3
+fitpar3=lm(tsset3 ~ time + I(time^2))  #Model 
+predpar3<-predict(fitpar3)             #Prediction
+forepar3<-forecast(predpar3,h=seth-3)  #Forecast
+````
+
+###Exponential Model
+````{r}
+#Operator 1
+Yexp1=lm(log(tsset1) ~ time,na.action=)          #Transform
+parmexp1<-as.list(Yexp1$coeff)
+betae1<- exp(parmexp1$"(Intercept)")  #growth range (a)
+ke1<- parmexp1$time                   #growth rate (b)
+fitexp1<-betae1*exp(ke1*time)         #Model
+predexp1<-forecast(fitexp1,h=seth-3)
+
+#Operator 2
+Yexp2=lm(log(tsset2) ~ time)          #Transform
+parmexp2<-as.list(Yexp2$coeff)
+betae2<- exp(parmexp2$"(Intercept)")  #growth range (a)
+ke2<- parmexp2$time                   #growth rate (b)
+fitexp2<-betae2*exp(ke2*time)         #Model
+predexp2<-forecast(fitexp2,h=seth-3)
+
+#Operator 3
+Yexp3=lm(log(tsset3) ~ time)          #Transform
+parmexp3<-as.list(Yexp3$coeff)
+betae3<- exp(parmexp3$"(Intercept)")  #growth range (a)
+ke3<- parmexp3$time                   #growth rate (b)
+fitexp3<-betae3*exp(ke3*time)         #Model
+predexp3<-forecast(fitexp3,h=seth-3)
+````
+
+The predictions with growth curves are:
+````{r}
+#Operator 1
+set1a<-data.frame(predlm1)  #Linear predictions
+lma<-data.frame(Fore_Lin1=set1a$Point.Forecast[4:8])
+data_predlm1<-data.frame(Lin1=c(fitlm1$fitted.values,set1a$Point.Forecast[1:3]))
+#Operator 2
+set1b<-data.frame(predlm2)  #Linear predictions
+lmb<-data.frame(Fore_Lin2=set1b$Point.Forecast[4:8])
+data_predlm2<-data.frame(Lin2=c(fitlm2$fitted.values,set1b$Point.Forecast[1:3]))
+#Operator 3
+set1c<-data.frame(predlm3)  #Linear predictions
+lmc<-data.frame(Fore_Lin3=set1c$Point.Forecast[4:8])
+data_predlm3<-data.frame(Lin3=c(fitlm3$fitted.values,set1c$Point.Forecast[1:3]))
+
+
+#Operator 1
+data_predpar1<-data.frame(Par1=predpar1) #Parabolic predictions
+set2a<-data.frame(forepar1)
+para<-data.frame(Fore_Par1=set2a$Point.Forecast)
+#Operator 2
+data_predpar2<-data.frame(Par2=predpar2) #Parabolic predictions
+set2b<-data.frame(forepar2)
+parb<-data.frame(Fore_Par2=set2b$Point.Forecast)
+#Operator 3
+data_predpar3<-data.frame(Par3=predpar3) #Parabolic predictions
+set2c<-data.frame(forepar3)
+parc<-data.frame(Fore_Par3=set2c$Point.Forecast)
+
+
+#Operator 1
+set3a<-data.frame(predexp1)  #Exponential predictions
+expa<-data.frame(Fore_Exp1=set3a$Point.Forecast)
+data_predexp1<-data.frame(Exp1=fitexp1)
+#Operator 2
+set3b<-data.frame(predexp2)  #Exponential predictions
+expb<-data.frame(Fore_Exp2=set3b$Point.Forecast)
+data_predexp2<-data.frame(Exp2=fitexp2)
+#Operator 1
+set3c<-data.frame(predexp3)  #Exponential predictions
+expc<-data.frame(Fore_Exp3=set3c$Point.Forecast)
+data_predexp3<-data.frame(Exp3=fitexp3)
+
+
+##Sets of predictions
+data_pred1b<-data.frame(data_predlm1,data_predpar1,data_predexp1)  #Operator 1
+data_pred2b<-data.frame(data_predlm2,data_predpar2,data_predexp2)  #Operator 2
+data_pred3b<-data.frame(data_predlm3,data_predpar3,data_predexp3)  #Operator 3
+
+##Forecasting for 5 Years
+fore3a<-data.frame(Year=f1:f2,lma,para,expa)   #Operator 1
+fore3b<-data.frame(lmb,parb,expb)              #Operator 2
+fore3c<-data.frame(lmc,parc,expc)              #Operator 3
+````
+
+
+##2.2.Predicting with Logistic and Gompertz Model InBus
+
+###Logistic Model
+````{r}
+#Operator 1
+alpha1<-tssubs1[hi] +0.5           #upper asymptote (M)
+Y1<-log(alpha1/tssubs1-1)          #Transform
+Reglm1<-tslm(Y1~trend)             #Lineal Regression
+parmlm1<-as.list(Reglm1$coeff)
+
+beta1<- exp(parmlm1$"(Intercept)")  #growth range (a)
+k1<- -parmlm1$trend                 #growth rate (b)
+fitlog1 <- logistic(1:10, alpha1, beta1, k1)
+predlog1<-forecast(fitlog1,h=seth)
+
+#Operator 2
+alpha2<-tssubs2[hi] +0.5           #upper asymptote (M)
+Y2<-log(alpha2/tssubs2-1)          #Transform
+Reglm2<-tslm(Y2~trend)             #Lineal Regression
+parmlm2<-as.list(Reglm2$coeff)
+
+beta2<- exp(parmlm2$"(Intercept)")  #growth range (a)
+k2<- -parmlm2$trend                 #growth rate (b)
+fitlog2 <- logistic(1:10, alpha2, beta2, k2)
+predlog2<-forecast(fitlog2,h=seth)
+
+#Operator 3
+alpha3<-tssubs3[hi] +0.5           #upper asymptote (M)
+Y3<-log(alpha3/tssubs3-1)          #Transform
+Reglm3<-tslm(Y3~trend)             #Lineal Regression
+parmlm3<-as.list(Reglm3$coeff)
+
+beta3<- exp(parmlm3$"(Intercept)")  #growth range (a)
+k3<- -parmlm3$trend                 #growth rate (b)
+fitlog3 <- logistic(1:10, alpha3, beta3, k3)
+predlog3<-forecast(fitlog3,h=seth)
+````
+
+
+The predictions using logistic model are:
+````{r}
+set4a<-data.frame(predlog1)
+alog<-set4a$Point.Forecast   #Operator 1 predictions
+set4b<-data.frame(predlog2)
+blog<-set4b$Point.Forecast   #Operator 2 predictions
+set4c<-data.frame(predlog3)
+clog<-set4c$Point.Forecast   #Operator 3 predictions
+
+data_predlog1<-data.frame(Log1=fitlog1)
+data_predlog2<-data.frame(Log2=fitlog2)
+data_predlog3<-data.frame(Log3=fitlog3)
+````
+
+
+###Gompertz Model
+````{r}
+#Operator 1
+alphag1<-tssubs1[hi] +5                 #upper asymptote (M)
+Y1g<-log(log(alphag1/tssubs1))          #Transform
+Reglmg1<-tslm(Y1g~trend)                #Lineal Regression
+parmglm1<-as.list(Reglmg1$coeff)
+
+betag1<- exp(parmglm1$"(Intercept)")  #growth range (a)
+kg1<- -parmglm1$trend                 #growth rate (b)
+fitgom1 <- gompertz(1:10, alphag1, betag1, kg1)
+predgom1<-forecast(fitgom1,h=seth)
+
+#Operator 2
+alphag2<-tssubs2[hi] +5                 #upper asymptote (M)
+Y2g<-log(log(alphag2/tssubs2))          #Transform
+Reglmg2<-tslm(Y2g~trend)                #Lineal Regression
+parmglm2<-as.list(Reglmg2$coeff)
+
+betag2<- exp(parmglm2$"(Intercept)")  #growth range (a)
+kg2<- -parmglm2$trend                 #growth rate (b)
+fitgom2 <- gompertz(1:10, alphag2, betag2, kg2)
+predgom2<-forecast(fitgom2,h=seth)
+
+#Operator 3
+alphag3<-tssubs3[hi] +5                 #upper asymptote (M)
+Y3g<-log(log(alphag3/tssubs3))          #Transform
+Reglmg3<-tslm(Y3g~trend)                #Lineal Regression
+parmglm3<-as.list(Reglmg3$coeff)
+
+betag3<- exp(parmglm3$"(Intercept)")  #growth range (a)
+kg3<- -parmglm3$trend                 #growth rate (b)
+fitgom3 <- gompertz(1:10, alphag3, betag3, kg3)
+predgom3<-forecast(fitgom3,h=seth)
+````
+
+The predictions using gompertz model are:
+````{r}
+set5a<-data.frame(predgom1)
+agom<-set5a$Point.Forecast   #Operator 1 predictions
+set5b<-data.frame(predgom2)
+bgom<-set5b$Point.Forecast   #Operator 2 predictions
+set5c<-data.frame(predgom3)
+cgom<-set5c$Point.Forecast   #Operator 3 predictions
+
+data_predgom1<-data.frame(Gom1=fitgom1)
+data_predgom2<-data.frame(Gom2=fitgom2)
+data_predgom3<-data.frame(Gom3=fitgom3)
+````
+
+###Forecasting for 5 years
+````{r}
+fore4a<-data.frame(Fore_Log1=alog[1:5],Fore_Gom1=agom[1:5])
+fore4b<-data.frame(Fore_Log2=blog[1:5],Fore_Gom1=bgom[1:5])
+fore4c<-data.frame(Fore_Log3=clog[1:5],Fore_Gom1=cgom[1:5])
+````
+
+##2.3.Performance Models for Internet Bussines
+Using the forecast package, the performance models are:
+**(ME)**:Mean Error 
+**(RMSE)**:Root Mean Square Error
+**(MAE)**: Mean Absolute Error
+**(MPE)**: Mean Porcentual Error
+**(MAPE)**: Mean Absolute Porcentual Error
+
+````{r}
+#Modelo Lineal
+acc_d1<-accuracy(predlm1) #Operator 1
+acc_d2<-accuracy(predlm2) #Operator 2
+acc_d3<-accuracy(predlm3) #Operator 3
+
+#Modelo Parabólico
+acc_e1<-accuracy(predpar1,tsset1)  #Operator 1
+acc_e2<-accuracy(predpar2,tsset2)  #Operator 2
+acc_e3<-accuracy(predpar3,tsset3)  #Operator 3
+
+#Modelo Exponencial
+acc_f1<-accuracy(predexp1)  #Operator 1 
+acc_f2<-accuracy(predexp2)  #Operator 2 
+acc_f3<-accuracy(predexp3)  #Operator 3 
+
+#Modelo Logístico
+acc_g1<-accuracy(predlog1) #Operator 1 
+acc_g2<-accuracy(predlog2) #Operator 2 
+acc_g3<-accuracy(predlog3) #Operator 3 
+
+#Modelo Gompertz
+acc_h1<-accuracy(predgom1) #Operator 1 
+acc_h2<-accuracy(predgom2) #Operator 2 
+acc_h3<-accuracy(predgom3) #Operator 3 
+
+#The performance sets are:
+Models<-c("Linear","Parabolic","Exponential","Logistic","Gompertz")
+
+#Opereator 1 
+accd1<-acc_d1[1,1:5]  #Linear
+acce1<-acc_e1[1,1:5]  #Parabolic
+accf1<-acc_f1[1,1:5]  #Exponential
+accg1<-acc_g1[1,1:5]  #Logistic
+acch1<-acc_h1[1,1:5]  #Gompertz
+acc_all1b<-round(rbind(accd1,acce1,accf1,accg1,acch1),2)
+performIBus1<-data.frame(Models,acc_all1b)
+
+#Operator 2
+accd2<-acc_d2[1,1:5]
+acce2<-acc_e2[1,1:5]
+accf2<-acc_f2[1,1:5]
+accg2<-acc_g2[1,1:5]
+acch2<-acc_h2[1,1:5]
+acc_all2b<-round(rbind(accd2,acce2,accf2,accg2,acch2),2)
+performIBus2<-data.frame(Models,acc_all2b)
+
+#Operator 3
+accd3<-acc_d3[1,1:5]
+acce3<-acc_e3[1,1:5]
+accf3<-acc_f3[1,1:5]
+accg3<-acc_g3[1,1:5]
+acch3<-acc_h3[1,1:5]
+acc_all3b<-round(rbind(accd3,acce3,accf3,accg3,acch3),2)
+performIBus3<-data.frame(Models,acc_all3b)
+````
+
+##Predictions Report
+Internet Bussines Predictions by service provider
+````{r}
+predIBus1<-data.frame(data_pred1b,data_predlog1,data_predgom1) #Operator 1 
+predIBus2<-data.frame(data_pred2b,data_predlog2,data_predgom2) #Operator 2 
+predIBus3<-data.frame(data_pred3b,data_predlog3,data_predgom3) #Operator 3 
+````
+
+##Forecast Reports
+Forecasting for 5 Years Internet Bussines
+````{r}
+foreIBus1<-data.frame(fore3a,fore4a)  #Operator 1
+foreIBus2<-data.frame(fore3b,fore4b)  #Operator 2
+foreIBus3<-data.frame(fore3c,fore4c)  #Operator 3
+``````
+
+
+#3.Demand Models for VoD Subscribers
+
+##Subset data
+````{r}
+dataVoD1<-data.frame(Year=year,Subs=oper1$VoD1)  #Operator 1
+tssubs1<-ts(oper1$VoD1,start=start,end=end) #Time serie
+dataVoD2<-data.frame(Year=year,Subs=oper2$VoD2)  #Operator 2
+tssubs2<-ts(oper2$VoD2,start=start,end=end) #Time serie
+dataVoD3<-data.frame(Year=year,Subs=oper3$VoD3)  #Operator 3
+tssubs3<-ts(oper3$VoD3,start=start,end=end) #Time serie
+````
+
+##3.1.Predicting with Logistic and Gompertz Model VoD
+##Logistic Model
+
+````{r}
+#Operator 1
+alpha1<-tssubs1[hi] +0.5           #upper asymptote (M)
+Y1<-log(alpha1/tssubs1-1)*1          #Transform
+Reglm1<-tslm(Y1~trend)             #Lineal Regression  #ERROR
+parmlm1<-as.list(Reglm1$coeff)
+
+beta1<- exp(parmlm1$"(Intercept)")  #growth range (a)
+k1<- -parmlm1$trend                 #growth rate (b)
+fitlog1 <- logistic(1:10, alpha1, beta1, k1)
+predlog1<-forecast(fitlog1,h=seth)
+a<-predict(fitlog1,h=seth)
+plot(a)
+#Operator 2
+alpha2<-tssubs2[hi] +0.5           #upper asymptote (M)
+Y2<-log(alpha2/tssubs2-1)          #Transform
+Reglm2<-tslm(Y2~trend)             #Lineal Regression
+parmlm2<-as.list(Reglm2$coeff)
+
+beta2<- exp(parmlm2$"(Intercept)")  #growth range (a)
+k2<- -parmlm2$trend                 #growth rate (b)
+fitlog2 <- logistic(1:10, alpha2, beta2, k2)
+predlog2<-forecast(fitlog2,h=seth)
+
+#Operator 3
+alpha3<-tssubs3[hi] +0.5           #upper asymptote (M)
+Y3<-log(alpha3/tssubs3-1)          #Transform
+Reglm3<-tslm(Y3~trend)             #Lineal Regression
+parmlm3<-as.list(Reglm3$coeff)
+
+beta3<- exp(parmlm3$"(Intercept)")  #growth range (a)
+k3<- -parmlm3$trend                 #growth rate (b)
+fitlog3 <- logistic(1:10, alpha3, beta3, k3)
+predlog3<-forecast(fitlog3,h=seth)
+````
+
+##The predictions using logistic model are:
+````{r}
+set4a<-data.frame(predlog1)
+alog<-set4a$Point.Forecast   #Operator 1 predictions
+set4b<-data.frame(predlog2)
+blog<-set4b$Point.Forecast   #Operator 2 predictions
+set4c<-data.frame(predlog3)
+clog<-set4c$Point.Forecast   #Operator 3 predictions
+
+data_predlog1<-data.frame(Log1=fitlog1)
+data_predlog2<-data.frame(Log2=fitlog2)
+data_predlog3<-data.frame(Log3=fitlog3)
+````
+
+###Gompertz Model
+Using the **growthmodels** package, Computes the Gompertz growth model
+**Usage**
+gompertz(t, alpha, beta, k)
+**Arguments**
+t     time
+x     size
+alpha upper asymptote
+beta  growth displacement
+k     growth rate
+`````{r}
+#Operator 1
+alphag1<-tssubs1[hi] +5                 #upper asymptote (M)
+Y1g<-log(log(alphag1/tssubs1))          #Transform
+Reglmg1<-tslm(Y1g~trend)                #Lineal Regression
+parmglm1<-as.list(Reglmg1$coeff)
+
+betag1<- exp(parmglm1$"(Intercept)")  #growth range (a)
+kg1<- -parmglm1$trend                 #growth rate (b)
+fitgom1 <- gompertz(1:10, alphag1, betag1, kg1)
+predgom1<-forecast(fitgom1,h=seth)
+
+#Operator 2
+alphag2<-tssubs2[hi] +5                 #upper asymptote (M)
+Y2g<-log(log(alphag2/tssubs2))          #Transform
+Reglmg2<-tslm(Y2g~trend)                #Lineal Regression
+parmglm2<-as.list(Reglmg2$coeff)
+
+betag2<- exp(parmglm2$"(Intercept)")  #growth range (a)
+kg2<- -parmglm2$trend                 #growth rate (b)
+fitgom2 <- gompertz(1:10, alphag2, betag2, kg2)
+predgom2<-forecast(fitgom2,h=seth)
+
+#Operator 3
+alphag3<-tssubs3[hi] +5                 #upper asymptote (M)
+Y3g<-log(log(alphag3/tssubs3))          #Transform
+Reglmg3<-tslm(Y3g~trend)                #Lineal Regression
+parmglm3<-as.list(Reglmg3$coeff)
+
+betag3<- exp(parmglm3$"(Intercept)")  #growth range (a)
+kg3<- -parmglm3$trend                 #growth rate (b)
+fitgom3 <- gompertz(1:10, alphag3, betag3, kg3)
+predgom3<-forecast(fitgom3,h=seth)
+````
+
+##The predictions using gompertz model are:
+````{r}
+set5a<-data.frame(predgom1)
+agom<-set5a$Point.Forecast   #Operator 1 predictions
+set5b<-data.frame(predgom2)
+bgom<-set5b$Point.Forecast   #Operator 2 predictions
+set5c<-data.frame(predgom3)
+cgom<-set5c$Point.Forecast   #Operator 3 predictions
+
+data_predgom1<-data.frame(Gom1=fitgom1)
+data_predgom2<-data.frame(Gom2=fitgom2)
+data_predgom3<-data.frame(Gom3=fitgom3)
+````
+
+###Parabolic Model
+````{r}
+#Operator 1
+fitpar1=lm(tssubs1 ~ time + I(time^2))  #Model
+predpar1<-predict(fitpar1)             #Prediction
+forepar1<-forecast(predpar1,h=seth-3)  #Forecast
+#Operator 2
+fitpar2=lm(tssubs2 ~ time + I(time^2))  #Model
+predpar2<-predict(fitpar2)             #Prediction
+forepar2<-forecast(predpar2,h=seth-3)  #Forecast
+#Operator 3
+fitpar3=lm(tssubs3 ~ time + I(time^2))  #Model 
+predpar3<-predict(fitpar3)             #Prediction
+forepar3<-forecast(predpar3,h=seth-3)  #Forecast
+
+#Operator 1
+data_predpar1<-data.frame(Par1=predpar1) #Parabolic predictions
+set2a<-data.frame(forepar1)
+para<-data.frame(Fore_Par1=set2a$Point.Forecast)
+#Operator 2
+data_predpar2<-data.frame(Par2=predpar2) #Parabolic predictions
+set2b<-data.frame(forepar2)
+parb<-data.frame(Fore_Par2=set2b$Point.Forecast)
+#Operator 3
+data_predpar3<-data.frame(Par3=predpar3) #Parabolic predictions
+set2c<-data.frame(forepar3)
+parc<-data.frame(Fore_Par3=set2c$Point.Forecast)
+
+````
+
+##Forecasting for 5 years
+````{r}
+fore5a<-data.frame(Fore_Log1=alog[1:5],Fore_Gom1=agom[1:5],Fore_Par1=forepar1)
+fore5b<-data.frame(Fore_Log2=blog[1:5],Fore_Gom2=bgom[1:5],Fore_Par2=forepar2)
+fore5c<-data.frame(Fore_Log3=clog[1:5],Fore_Gom3=cgom[1:5],Fore_Par3=forepar3)
+````
+
+
+##3.2.Predicting with Fisher Pry
+Model applied When substitution is driven by superior technology. 
+The new product or service presents some technological advantage over the old one.
+
+````{r}
+#Operator 1
+L1<-tssubs1[hi]+5                    #upper asymptote (L)
+transf1<-log((L1-tssubs1)/tssubs1)   #transform
+
+fitpry1<-tslm(transf1~trend)        #model
+set5a<-fitpry1$fitted.values
+predpry1<-L1/(1+exp(set5a))         #Prediction
+forepry1<-forecast(predpry1,h=seth) #Forecast
+
+#Operator 2
+L2<-tssubs2[hi]+5                    #upper asymptote (L)
+transf2<-log((L2-tssubs2)/tssubs2)   #transform
+
+fitpry2<-tslm(transf2~trend)        #model
+set5b<-fitpry2$fitted.values
+predpry2<-L2/(1+exp(set5b))         #Prediction
+forepry2<-forecast(predpry2,h=seth) #Forecast
+
+#Operator 3
+L3<-tssubs3[hi]+5                    #upper asymptote (L)
+transf3<-log((L3-tssubs3)/tssubs3)   #transform
+
+fitpry3<-tslm(transf3~trend)        #model
+set5c<-fitpry3$fitted.values
+predpry3<-L3/(1+exp(set5c))         #Prediction
+forepry3<-forecast(predpry3,h=seth) #Forecast
+````
+
+
+##3.3. Bass Model  
+
+**m** Total number of potential buyers of the new product
+**p** The coefficient of innovation
+**q** The coefficient of imitation
+
+````{r}
+
+#Operator1
+setbas1<-subset(dataVoD1,Subs>=0.11)
+setbas2<-subset(dataVoD1,Subs<0.11)
+demand1<-tssubs1[(tssubs1)>=0.11]
+time<-1:length(demand1)
+Tdelt <- time     #Accuracy, size predictions
+
+Bass.nls <- nls(demand1 ~ M * (((P + Q)^2/P) * exp(-(P + Q) * time))/(1 + (Q/P) 
+                                                                      *exp(-(P + Q) * time))^2, start = list(M = 60630, P = 0.03, Q = 0.38))
+Bcoef <- coef(Bass.nls) # get coefficient operator 1
+m <- Bcoef[1]
+p <- Bcoef[2]
+q <- Bcoef[3]
+ngete <- exp(-(p + q) * Tdelt)  #Setting the starting values for M to the Subs
+
+fitbas1 <- m * ((p + q)^2/p) * ngete/(1 + (q/p) * ngete)^2   #Model
+setbas3<-data.frame(Year=setbas1$Year,Subs=fitbas1)             #Prediction
+x<-nrow(setbas2)
+cero<-data.frame(Year=setbas2$Year,Subs=c(1:x*0))
+predbas1<-rbind(cero,setbas3)
+forebas1<-forecast(predbas1$Subs,h=seth)                     #Forecast
+
+
+#Operator2
+setbas1<-subset(dataVoD2,Subs>=0.101)
+setbas2<-subset(dataVoD2,Subs<0.101)
+demand2<-tssubs2[(tssubs2)>=0.101]
+time<-1:length(demand2)
+Tdelt <- time     #Accuracy, size predictions
+
+Bass.nls <- nls(demand2 ~ M * (((P + Q)^2/P)*exp(-(P + Q) * time))/
+                  (1 + (Q/P)*exp(-(P + Q) * time))^2, start = list(M = 60630, P = 0.03, Q = 0.38))
+Bcoef <- coef(Bass.nls) # get coefficient operator 1
+m <- Bcoef[1]
+p <- Bcoef[2]
+q <- Bcoef[3]
+ngete <- exp(-(p + q) * Tdelt)  #Setting the starting values for M to the Subs
+
+fitbas2 <- m * ((p + q)^2/p) * ngete/(1 + (q/p) * ngete)^2   #Model
+setbas3<-data.frame(Year=setbas1$Year,Subs=fitbas2)          #Prediction
+x<-nrow(setbas2)
+cero<-data.frame(Year=setbas2$Year,Subs=c(1:x*0))
+predbas2<-rbind(cero,setbas3)
+forebas2<-forecast(predbas2$Subs,h=seth)                     #Forecast
+
+#Operator3
+setbas1<-subset(dataVoD3,Subs>=0.101)
+setbas2<-subset(dataVoD3,Subs<0.101)
+demand3<-tssubs3[(tssubs3)>=0.101]
+time<-1:length(demand3)
+Tdelt <- time     #Accuracy, size predictions
+
+Bass.nls <- nls(demand3 ~ M * (((P + Q)^2/P) * exp(-(P + Q) * time))/(1 + (Q/P) 
+                                                                      *exp(-(P + Q) * time))^2, start = list(M = 60630, P = 0.03, Q = 0.38))
+Bcoef <- coef(Bass.nls) # get coefficient operator 1
+m <- Bcoef[1]
+p <- Bcoef[2]
+q <- Bcoef[3]
+ngete <- exp(-(p + q) * Tdelt)  #Setting the starting values for M to the Subs
+
+fitbas3 <- m * ((p + q)^2/p) * ngete/(1 + (q/p) * ngete)^2   #Model
+setbas3<-data.frame(Year=setbas1$Year,Subs=fitbas3)             #Prediction
+x<-nrow(setbas2)
+cero<-data.frame(Year=setbas2$Year,Subs=c(1:x*0))
+predbas3<-rbind(cero,setbas3)
+forebas3<-forecast(predbas3$Subs,h=seth)                     #Forecast
+````
+
+The predictions using Bass and Fisher Pry model are:
+
+````{r}
+set6a<-data.frame(forepry1)
+apry<-set6a$Point.Forecast   #Operator 1 predictions
+set6b<-data.frame(forepry2)
+bpry<-set6b$Point.Forecast   #Operator 2 predictions
+set6c<-data.frame(forepry3)
+cpry<-set6c$Point.Forecast   #Operator 3 predictions
+
+set7a<-data.frame(forebas1)
+abas<-set7a$Point.Forecast   #Operator 1 predictions
+set7b<-data.frame(forebas2)
+bbas<-set7b$Point.Forecast   #Operator 2 predictions
+set7c<-data.frame(forebas3)
+cbas<-set7c$Point.Forecast   #Operator 3 predictions
+
+data_pred1c<-data.frame(Pry1=predpry1,Bass1=predbas1$Subs)
+data_pred2c<-data.frame(Pry2=predpry2,Bass2=predbas2$Subs)
+data_pred3c<-data.frame(Pry3=predpry3,Bass3=predbas3$Subs)
+````
+
+#Forecasting for 5 years
+````{r}
+fore6a<-data.frame(Fore_Pry1=apry[1:5],Fore_Bas1=abas[1:5])
+fore6b<-data.frame(Fore_Pry2=bpry[1:5],Fore_Bas2=bbas[1:5])
+fore6c<-data.frame(Fore_Pry3=cpry[1:5],Fore_Bas3=cbas[1:5])
+````
+
+##3.4.Performance Models for VoD
+
+Using the forecast package, the performance models are:
+**(ME)**:Mean Error 
+**(RMSE)**:Root Mean Square Error
+**(MAE)**: Mean Absolute Error
+*(MPE)**: Mean Porcentual Error
+**(MAPE)**: Mean Absolute Porcentual Error
+
+````{r}
+#Modelo Parabólico
+acc_e1<-accuracy(predpar1,tssubs1)  #Operator 1
+acc_e2<-accuracy(predpar2,tssubs2)  #Operator 2
+acc_e3<-accuracy(predpar3,tssubs3)  #Operator 3
+
+#Modelo Logístico
+acc_g1<-accuracy(predlog1) #Operator 1 
+acc_g2<-accuracy(predlog2) #Operator 2 
+acc_g3<-accuracy(predlog3) #Operator 3 
+
+#Modelo Gompertz
+acc_h1<-accuracy(predgom1) #Operator 1 
+acc_h2<-accuracy(predgom2) #Operator 2 
+acc_h3<-accuracy(predgom3) #Operator 3 
+
+#Modelo Fisher-Pry
+acc_i1<-accuracy(predpry1,tssubs1) #Operator 1 
+acc_i2<-accuracy(predpry2,tssubs2) #Operator 2
+acc_i3<-accuracy(predpry3,tssubs3) #Operator 3
+
+#Modelo Bass
+acc_j1<-accuracy(predbas1$Subs,dataVoD1$Subs)   #Duda Operator 1
+acc_j2<-accuracy(predbas2$Subs,dataVoD2$Subs)   #Duda Operator 2
+acc_j3<-accuracy(predbas3$Subs,dataVoD3$Subs)   #Duda Operator 3
+````
+
+The performance sets are:
+````{r}
+Models<-c("Parabolic","Logistic","Gompertz","Fisher-Pry","Bass")
+
+#Opereator 1
+acce1<-acc_e1[1,1:5]  #Parabolic
+accg1<-acc_g1[1,1:5]  #Logistic
+acch1<-acc_h1[1,1:5]  #Gompertz
+acci1<-acc_i1[1,1:5]  #Fisher-Pry
+accj1<-acc_j1[1,1:5]  #Bass
+acc_all1b<-round(rbind(acce1,accg1,acch1,acci1,accj1),2)
+performVoD1<-data.frame(Models,acc_all1b)
+
+#Operator 2
+acce2<-acc_e1[1,1:5]  #Parabolic
+accg2<-acc_g2[1,1:5]
+acch2<-acc_h2[1,1:5]
+acci2<-acc_i2[1,1:5]
+accj2<-acc_j2[1,1:5]
+acc_all2b<-round(rbind(acce2,accg2,acch2,acci2,accj2),2)
+performVoD2<-data.frame(Models,acc_all2b)
+
+#Operator 3
+acce3<-acc_e1[1,1:5]  #Parabolic
+accg3<-acc_g3[1,1:5]
+acch3<-acc_h3[1,1:5]
+acci3<-acc_i3[1,1:5]
+accj3<-acc_j3[1,1:5]
+acc_all3b<-round(rbind(acce3,accg3,acch3,acci3,accj3),2)
+performVoD3<-data.frame(Models,acc_all3b)
+````
+
+
+##Predictions Reports
+````{r}
+#Internet Residential Predictions by service provider
+predVoD1<-data.frame(data_predlog1,data_predgom1,data_predpar1,data_pred1c) #Operator 1 
+predVoD2<-data.frame(data_predlog2,data_predgom2,data_predpar2,data_pred2c) #Operator 2 
+predVoD3<-data.frame(data_predlog3,data_predgom3,data_predpar3,data_pred3c) #Operator 3 
+````
+
+
+##Forecast Reports
+Forecasting for 5 Years Video on Demand 
+````{r}
+foreVoD1<-data.frame(fore5a,fore6a)  #Operator 1
+foreVoD2<-data.frame(fore5b,fore6b)  #Operator 2
+foreVoD3<-data.frame(fore5c,fore6c)  #Operator 3
+````
+
+
+#Demand Models for VoIP Subscribers
+
+##Subset data
+````{r}
+dataVoIP1<-data.frame(Year=year,Subs=oper1$VoIP1)  #Operator 1
+tssubs1<-ts(oper1$VoIP1,start=start,end=end) #Time serie
+dataVoIP2<-data.frame(Year=year,Subs=oper2$VoIP2)  #Operator 2
+tssubs2<-ts(oper2$VoIP2,start=start,end=end) #Time serie
+dataVoIP3<-data.frame(Year=year,Subs=oper3$VoIP3)  #Operator 3
+tssubs3<-ts(oper3$VoIP3,start=start,end=end) #Time serie
+````
+
+
+##4.1.Predicting with Logistic and Gompertz Model VoIP
+
+###Logistic Model
+````{r}
+#Operator 1
+alpha1<-tssubs1[hi] +0.5           #upper asymptote (M)
+Y1<-log(alpha1/tssubs1-1)          #Transform
+Reglm1<-tslm(Y1~trend)             #Lineal Regression
+parmlm1<-as.list(Reglm1$coeff)
+
+beta1<- exp(parmlm1$"(Intercept)")  #growth range (a)
+k1<- -parmlm1$trend                 #growth rate (b)
+fitlog1 <- logistic(1:10, alpha1, beta1, k1)
+predlog1<-forecast(fitlog1,h=seth)
+
+#Operator 2
+alpha2<-tssubs2[hi] +0.5           #upper asymptote (M)
+Y2<-log(alpha2/tssubs2-1)          #Transform
+Reglm2<-tslm(Y2~trend)             #Lineal Regression
+parmlm2<-as.list(Reglm2$coeff)
+
+beta2<- exp(parmlm2$"(Intercept)")  #growth range (a)
+k2<- -parmlm2$trend                 #growth rate (b)
+fitlog2 <- logistic(1:10, alpha2, beta2, k2)
+predlog2<-forecast(fitlog2,h=seth)
+
+#Operator 3
+alpha3<-tssubs3[hi] +0.5           #upper asymptote (M)
+Y3<-log(alpha3/tssubs3-1)          #Transform
+Reglm3<-tslm(Y3~trend)             #Lineal Regression
+parmlm3<-as.list(Reglm3$coeff)
+
+beta3<- exp(parmlm3$"(Intercept)")  #growth range (a)
+k3<- -parmlm3$trend                 #growth rate (b)
+fitlog3 <- logistic(1:10, alpha3, beta3, k3)
+predlog3<-forecast(fitlog3,h=seth)
+
+#The predictions using logistic model are:
+set4a<-data.frame(predlog1)
+alog<-set4a$Point.Forecast   #Operator 1 predictions
+set4b<-data.frame(predlog2)
+blog<-set4b$Point.Forecast   #Operator 2 predictions
+set4c<-data.frame(predlog3)
+clog<-set4c$Point.Forecast   #Operator 3 predictions
+
+data_predlog1<-data.frame(Log1=fitlog1)
+data_predlog2<-data.frame(Log2=fitlog2)
+data_predlog3<-data.frame(Log3=fitlog3)
+````
+
+###Gompertz Model
+````{r}
+#Operator 1
+alphag1<-tssubs1[hi] +5                 #upper asymptote (M)
+Y1g<-log(log(alphag1/tssubs1))          #Transform
+Reglmg1<-tslm(Y1g~trend)                #Lineal Regression
+parmglm1<-as.list(Reglmg1$coeff)
+
+betag1<- exp(parmglm1$"(Intercept)")  #growth range (a)
+kg1<- -parmglm1$trend                 #growth rate (b)
+fitgom1 <- gompertz(1:10, alphag1, betag1, kg1)
+predgom1<-forecast(fitgom1,h=seth)
+
+#Operator 2
+alphag2<-tssubs2[hi] +5                 #upper asymptote (M)
+Y2g<-log(log(alphag2/tssubs2))          #Transform
+Reglmg2<-tslm(Y2g~trend)                #Lineal Regression
+parmglm2<-as.list(Reglmg2$coeff)
+
+betag2<- exp(parmglm2$"(Intercept)")  #growth range (a)
+kg2<- -parmglm2$trend                 #growth rate (b)
+fitgom2 <- gompertz(1:10, alphag2, betag2, kg2)
+predgom2<-forecast(fitgom2,h=seth)
+
+#Operator 3
+alphag3<-tssubs3[hi] +5                 #upper asymptote (M)
+Y3g<-log(log(alphag3/tssubs3))          #Transform
+Reglmg3<-tslm(Y3g~trend)                #Lineal Regression
+parmglm3<-as.list(Reglmg3$coeff)
+
+betag3<- exp(parmglm3$"(Intercept)")  #growth range (a)
+kg3<- -parmglm3$trend                 #growth rate (b)
+fitgom3 <- gompertz(1:10, alphag3, betag3, kg3)
+predgom3<-forecast(fitgom3,h=seth)
+````
+
+The predictions using gompertz model are:
+
+````{r}
+set5a<-data.frame(predgom1)
+agom<-set5a$Point.Forecast   #Operator 1 predictions
+set5b<-data.frame(predgom2)
+bgom<-set5b$Point.Forecast   #Operator 2 predictions
+set5c<-data.frame(predgom3)
+cgom<-set5c$Point.Forecast   #Operator 3 predictions
+
+data_predgom1<-data.frame(Gom1=fitgom1)
+data_predgom2<-data.frame(Gom2=fitgom2)
+data_predgom3<-data.frame(Gom3=fitgom3)
+````
+
+###Parabolic Model
+````{r}
+time<-1:hi
+#Operator 1
+fitpar1=lm(tssubs1 ~ time + I(time^2))  #Model
+predpar1<-predict(fitpar1)             #Prediction
+forepar1<-forecast(predpar1,h=seth-3)  #Forecast
+#Operator 2
+fitpar2=lm(tssubs2 ~ time + I(time^2))  #Model
+predpar2<-predict(fitpar2)             #Prediction
+forepar2<-forecast(predpar2,h=seth-3)  #Forecast
+#Operator 3
+fitpar3=lm(tssubs3 ~ time + I(time^2))  #Model 
+predpar3<-predict(fitpar3)             #Prediction
+forepar3<-forecast(predpar3,h=seth-3)  #Forecast
+
+#Operator 1
+data_predpar1<-data.frame(Par1=predpar1) #Parabolic predictions
+set2a<-data.frame(forepar1)
+para<-data.frame(Fore_Par1=set2a$Point.Forecast)
+#Operator 2
+data_predpar2<-data.frame(Par2=predpar2) #Parabolic predictions
+set2b<-data.frame(forepar2)
+parb<-data.frame(Fore_Par2=set2b$Point.Forecast)
+#Operator 3
+data_predpar3<-data.frame(Par3=predpar3) #Parabolic predictions
+set2c<-data.frame(forepar3)
+parc<-data.frame(Fore_Par3=set2c$Point.Forecast)
+````
+
+
+###Forecasting for 5 years
+````{r}
+fore7a<-data.frame(Fore_Log1=alog[1:5],Fore_Gom1=agom[1:5],Fore_Par1=forepar1)
+fore7b<-data.frame(Fore_Log2=blog[1:5],Fore_Gom2=bgom[1:5],Fore_Par1=forepar1)
+fore7c<-data.frame(Fore_Log3=clog[1:5],Fore_Gom3=cgom[1:5],Fore_Par1=forepar1)
+````
+
+
+##Predicting with Fisher Pry
+Model applied When substitution is driven by superior technology. 
+The new product or service presents some technological advantage over the old one.
+
+````{r}
+#Operator 1
+L1<-tssubs1[hi]+5                    #upper asymptote (L)
+transf1<-log((L1-tssubs1)/tssubs1)   #transform
+
+fitpry1<-tslm(transf1~trend)        #model
+set5a<-fitpry1$fitted.values
+predpry1<-L1/(1+exp(set5a))         #Prediction
+forepry1<-forecast(predpry1,h=seth) #Forecast
+
+#Operator 2
+L2<-tssubs2[hi]+5                    #upper asymptote (L)
+transf2<-log((L2-tssubs2)/tssubs2)   #transform
+
+fitpry2<-tslm(transf2~trend)        #model
+set5b<-fitpry2$fitted.values
+predpry2<-L2/(1+exp(set5b))         #Prediction
+forepry2<-forecast(predpry2,h=seth) #Forecast
+
+#Operator 3
+L3<-tssubs3[hi]+5                    #upper asymptote (L)
+transf3<-log((L3-tssubs3)/tssubs3)   #transform
+
+fitpry3<-tslm(transf3~trend)        #model
+set5c<-fitpry3$fitted.values
+predpry3<-L3/(1+exp(set5c))         #Prediction
+forepry3<-forecast(predpry3,h=seth) #Forecast
+````
+
+
+##12. Bass Model                                              
+**m** Total number of potential buyers of the new product
+**p** The coefficient of innovation
+**q** The coefficient of imitation
+
+````{r}
+#Operator1
+setbas1<-subset(dataVoIP1,Subs>=0.11)
+setbas2<-subset(dataVoIP1,Subs<0.11)
+demand1<-tssubs1[(tssubs1)>=0.11]
+time<-1:length(demand1)
+Tdelt <- time     #Accuracy, size predictions
+
+Bass.nls <- nls(demand1 ~ M * (((P + Q)^2/P) * exp(-(P + Q) * time))/(1 + (Q/P) 
+                                                                      *exp(-(P + Q) * time))^2, start = list(M = 60630, P = 0.03, Q = 0.38))
+Bcoef <- coef(Bass.nls) # get coefficient operator 1
+m <- Bcoef[1]
+p <- Bcoef[2]
+q <- Bcoef[3]
+ngete <- exp(-(p + q) * Tdelt)  #Setting the starting values for M to the Subs
+
+fitbas1 <- m * ((p + q)^2/p) * ngete/(1 + (q/p) * ngete)^2   #Model
+setbas3<-data.frame(Year=setbas1$Year,Subs=fitbas1)             #Prediction
+x<-nrow(setbas2)
+cero<-data.frame(Year=setbas2$Year,Subs=c(1:x*0))
+predbas1<-rbind(cero,setbas3)
+forebas1<-forecast(predbas1$Subs,h=seth)                     #Forecast
+
+#Operator2
+setbas1<-subset(dataVoIP2,Subs>=0.11)
+setbas2<-subset(dataVoIP2,Subs<0.11)
+demand2<-tssubs2[(tssubs2)>=0.11]
+time<-1:length(demand2)
+Tdelt <- time     #Accuracy, size predictions
+
+Bass.nls <- nls(demand2 ~ M * (((P + Q)^2/P) * exp(-(P + Q) * time))/(1 + (Q/P) 
+                                                                      *exp(-(P + Q) * time))^2, start = list(M = 60630, P = 0.03, Q = 0.38))
+Bcoef <- coef(Bass.nls) # get coefficient operator 1
+m <- Bcoef[1]
+p <- Bcoef[2]
+q <- Bcoef[3]
+ngete <- exp(-(p + q) * Tdelt)  #Setting the starting values for M to the Subs
+
+fitbas2 <- m * ((p + q)^2/p) * ngete/(1 + (q/p) * ngete)^2   #Model
+setbas3<-data.frame(Year=setbas1$Year,Subs=fitbas2)             #Prediction
+x<-nrow(setbas2)
+cero<-data.frame(Year=setbas2$Year,Subs=c(1:x*0))
+predbas2<-rbind(cero,setbas3)
+forebas2<-forecast(predbas2$Subs,h=seth)                     #Forecast
+
+#Operator3
+setbas1<-subset(dataVoIP3,Subs>=0.11)
+setbas2<-subset(dataVoIP3,Subs<0.11)
+demand3<-tssubs3[(tssubs3)>=0.11]
+time<-1:length(demand3)
+Tdelt <- time     #Accuracy, size predictions
+
+Bass.nls <- nls(demand3 ~ M * (((P + Q)^2/P) * exp(-(P + Q) * time))/(1 + (Q/P) 
+                                                                      *exp(-(P + Q) * time))^2, start = list(M = 60630, P = 0.03, Q = 0.38))
+Bcoef <- coef(Bass.nls) # get coefficient operator 1
+m <- Bcoef[1]
+p <- Bcoef[2]
+q <- Bcoef[3]
+ngete <- exp(-(p + q) * Tdelt)  #Setting the starting values for M to the Subs
+
+fitbas3 <- m * ((p + q)^2/p) * ngete/(1 + (q/p) * ngete)^2   #Model
+setbas3<-data.frame(Year=setbas1$Year,Subs=fitbas3)             #Prediction
+x<-nrow(setbas2)
+cero<-data.frame(Year=setbas2$Year,Subs=c(1:x*0))
+predbas3<-rbind(cero,setbas3)
+forebas3<-forecast(predbas3$Subs,h=seth)                     #Forecast
+````
+
+
+The predictions using Bass and Fisher Pry model are:
+````{r}
+set6a<-data.frame(forepry1)
+apry<-set6a$Point.Forecast   #Operator 1 predictions
+set6b<-data.frame(forepry2)
+bpry<-set6b$Point.Forecast   #Operator 2 predictions
+set6c<-data.frame(forepry3)
+cpry<-set6c$Point.Forecast   #Operator 3 predictions
+
+set7a<-data.frame(forebas1)
+abas<-set7a$Point.Forecast   #Operator 1 predictions
+set7b<-data.frame(forebas2)
+bbas<-set7b$Point.Forecast   #Operator 2 predictions
+set7c<-data.frame(forebas3)
+cbas<-set7c$Point.Forecast   #Operator 3 predictions
+
+data_pred1c<-data.frame(Pry1=predpry1,Bass1=predbas1$Subs)
+data_pred2c<-data.frame(Pry2=predpry2,Bass2=predbas2$Subs)
+data_pred3c<-data.frame(Pry3=predpry3,Bass3=predbas3$Subs)
+````
+
+##Forecasting for 5 years
+````{r}
+fore8a<-data.frame(Fore_Pry1=apry[1:5],Fore_Bas1=abas[1:5])
+fore8b<-data.frame(Fore_Pry2=bpry[1:5],Fore_Bas2=bbas[1:5])
+fore8c<-data.frame(Fore_Pry3=cpry[1:5],Fore_Bas3=cbas[1:5])
+````
+
+##13.Performance Models for VoIP
+Using the forecast package, the performance models are:
+**(ME)**:Mean Error 
+**(RMSE)**:Root Mean Square Error
+**(MAE)**: Mean Absolute Error
+**(MPE)**: Mean Porcentual Error
+**(MAPE)**: Mean Absolute Porcentual Error
+
+````{r}
+#Modelo Parabólico
+acc_e1<-accuracy(predpar1,tssubs1)  #Operator 1
+acc_e2<-accuracy(predpar2,tssubs2)  #Operator 2
+acc_e3<-accuracy(predpar3,tssubs3)  #Operator 3
+
+#Modelo Logístico
+acc_g1<-accuracy(predlog1) #Operator 1 
+acc_g2<-accuracy(predlog2) #Operator 2 
+acc_g3<-accuracy(predlog3) #Operator 3 
+
+#Modelo Gompertz
+acc_h1<-accuracy(predgom1) #Operator 1 
+acc_h2<-accuracy(predgom2) #Operator 2 
+acc_h3<-accuracy(predgom3) #Operator 3 
+
+#Modelo Fisher-Pry
+acc_i1<-accuracy(predpry1,tssubs1) #Operator 1 
+acc_i2<-accuracy(predpry2,tssubs2) #Operator 2
+acc_i3<-accuracy(predpry3,tssubs3) #Operator 3
+
+#Modelo Bass
+acc_j1<-accuracy(predbas1$Subs,dataVoIP1$Subs)   #Duda Operator 1
+acc_j2<-accuracy(predbas2$Subs,dataVoIP2$Subs)   #Duda Operator 2
+acc_j3<-accuracy(predbas3$Subs,dataVoIP3$Subs)   #Duda Operator 3
+````
+
+The performance sets are:
+````{r}
+Models<-c("Parabolic","Logistic","Gompertz","Fisher-Pry","Bass")
+
+#Opereator 1
+acce1<-acc_e1[1,1:5]  #Parabolic
+accg1<-acc_g1[1,1:5]  #Logistic
+acch1<-acc_h1[1,1:5]  #Gompertz
+acci1<-acc_i1[1,1:5]  #Fisher-Pry
+accj1<-acc_j1[1,1:5]  #Bass
+acc_all1b<-round(rbind(acce1,accg1,acch1,acci1,accj1),2)
+performVoIP1<-data.frame(Models,acc_all1b)
+
+#Operator 2
+acce2<-acc_e1[1,1:5]  #Parabolic
+accg2<-acc_g2[1,1:5]
+acch2<-acc_h2[1,1:5]
+acci2<-acc_i2[1,1:5]
+accj2<-acc_j2[1,1:5]
+acc_all2b<-round(rbind(acce2,accg2,acch2,acci2,accj2),2)
+performVoIP2<-data.frame(Models,acc_all2b)
+
+#Operator 3
+acce3<-acc_e1[1,1:5]  #Parabolic
+accg3<-acc_g3[1,1:5]
+acch3<-acc_h3[1,1:5]
+acci3<-acc_i3[1,1:5]
+accj3<-acc_j3[1,1:5]
+acc_all3b<-round(rbind(acce3,accg3,acch3,acci3,accj3),2)
+performVoIP3<-data.frame(Models,acc_all3b)
+````
+
+
+##Predictions Reports
+VoIP Predictions by service provider
+````{r}
+predVoIP1<-data.frame(data_predlog1,data_predgom1,data_predpar1,data_pred1c) #Operator 1 
+predVoIP2<-data.frame(data_predlog2,data_predgom2,data_predpar2,data_pred2c) #Operator 2 
+predVoIP3<-data.frame(data_predlog3,data_predgom3,data_predpar3,data_pred3c) #Operator 3 
+````
+
+##Forecast Reports
+Forecasting for 5 Years Video on Demand 
+```{r}
+foreVoIP1<-data.frame(fore7a,fore8a)  #Operator 1
+foreVoIP2<-data.frame(fore7b,fore8b)  #Operator 2
+foreVoIP3<-data.frame(fore7c,fore8c)  #Operator 3
+````
+
+
+#Predictions, Forecast and Performance Reports
+
+##Predictions Report
+````{r}
+predIRes<-round(data.frame(predIRes1,predIRes2,predIRes3),2)
+predIBus<-round(data.frame(predIBus1,predIBus2,predIBus3),2)
+predVoD<-round(data.frame(predVoD1,predVoD2,predVoD3),2)
+predVoIP<-round(data.frame(predVoIP1,predVoIP2,predVoIP3),2)
+
+predict<-data.frame(Res=predIRes,VoD=predVoD,VoIP=predVoIP,Bus=predIBus)
+predict
+#write.csv2(predict,"Predictions_Report.csv")
+````
+
+##Forecast Report
+````{r}
+foreIRes<-round(data.frame(foreIRes1,foreIRes2,foreIRes3),2)
+foreIBus<-round(data.frame(foreIBus1,foreIBus2,foreIBus3),2)
+foreVoD<-round(data.frame(foreVoD1,foreVoD2,foreVoD3),2)
+foreVoIP<-round(data.frame(foreVoIP1,foreVoIP2,foreVoIP3),2)
+
+forecast<-data.frame(Res=foreIRes,VoD=foreVoD,VoIP=foreVoIP,Bus=foreIBus)
+forecast
+#write.csv2(forecast,"Forecasting_Report.csv")
+````
+
+##Performance Report
+````{r}
+performIRes<-data.frame(performIRes1,performIRes2[2:6],performIRes3[2:6]) #Internet Residential
+performIBus<-data.frame(performIBus1,performIBus2[2:6],performIBus3[2:6]) #Internet Bussines
+performVoD<-data.frame(performVoD1,performVoD2[2:6],performVoD3[2:6])     #Video on Demand
+performVoIP<-data.frame(performVoIP1,performVoIP2[2:6],performVoIP3[2:6]) #Voice over IP
+
+perform<-data.frame(Res=performIRes,VoD=performVoD,VoIP=performVoIP)#,performIBus)
+perform
+#write.csv2(perform,"Performance_Report.csv")
+````
+
+
