@@ -2,7 +2,7 @@
 title: "Final Demand Forecast"
 author: "Natalia Clivio"
 date: '2016'
-output: word_document
+output: pdf_document
 ---
 
 
@@ -12,11 +12,13 @@ The file loaded is the telecommunication companies´s subscribers by ten years,
 for each service provided by this companies. The service offering are:
 Internet residential and business, Video on demand and VoIP.
 
-````{r}
+````{r, warning=FALSE}
 library(caret)
 library(forecast)
 library(growthmodels)
+````
 
+````{r}
 subs<-read.csv("C:/Users/NataliaA/Documents/DataR/Subscribers_CV.csv",header=TRUE,
                sep=";",na.strings="NA",dec=",")
 
@@ -26,8 +28,6 @@ oper2<-data.frame(years,na.exclude(subs[6:9])) #Subs operador 2
 oper3<-data.frame(years,na.exclude(subs[10:13])) #Subs operador 3
 ````
 
-
-#Data Preparation
 ````{r}
 year<-years$Year
 start<-year[1]
@@ -43,7 +43,7 @@ time<-1:hi
 ````
 
 
-#Demand Models for Internet  Residential Subscribers
+#1.Demand Models for Internet  Residential Subscribers
 ##1.1 Predicting with Growth curves InRes
 
 Simple random sampling of time series is probably not the best way to resample 
@@ -69,7 +69,7 @@ tsset3<-tssubs3/1
 tstrain3<-window(tsset3,start=start,end=year1)        #Training and Testing data
 tstest3<-window(tsset3,start=year1,end=end)
 
-plot(tssubs1,main="Internet Residencial Mbps")
+plot(tssubs1,main="Internet Residencial Mbps",sub="Clientes 6 Mbps")
 lines(tstest1,col="red")
 legend("topleft",legend = c("Train set","Test set"), col=c("black","red"), lty = 1:2)
 ````
@@ -173,19 +173,19 @@ data_predexp2<-data.frame(Exp2=fitexp2)
 set3c<-data.frame(predexp3)  #Exponential predictions
 expc<-data.frame(Fore_Exp3=set3c$Point.Forecast)
 data_predexp3<-data.frame(Exp3=fitexp3)
+````
 
 
-##Sets of predictions
+##Sets of predictions and forecasting for 5 years are:
+````{r}
 data_pred1a<-data.frame(data_predlm1,data_predpar1,data_predexp1)  #Operator 1
 data_pred2a<-data.frame(data_predlm2,data_predpar2,data_predexp2)  #Operator 2
 data_pred3a<-data.frame(data_predlm3,data_predpar3,data_predexp3)  #Operator 3
-````
 
-###Forecasting for 5 Years are:
-````{r}
 fore1a<-data.frame(Year=f1:f2,lma,para,expa)   #Operator 1
 fore1b<-data.frame(lmb,parb,expb)              #Operator 2
 fore1c<-data.frame(lmc,parc,expc)              #Operator 3
+
 ````
 
 
@@ -400,7 +400,7 @@ foreIRes3<-data.frame(fore1c,fore2c)  #Operator 3
 ````
 
 
-#Demand Models for Internet Bussines Subscribers
+#2.Demand Models for Internet Bussines Subscribers
 
 ##Preparation Data
 ````{r}
@@ -647,6 +647,7 @@ fore4b<-data.frame(Fore_Log2=blog[1:5],Fore_Gom1=bgom[1:5])
 fore4c<-data.frame(Fore_Log3=clog[1:5],Fore_Gom1=cgom[1:5])
 ````
 
+
 ##2.3.Performance Models for Internet Bussines
 Using the forecast package, the performance models are:
 **(ME)**:Mean Error 
@@ -712,7 +713,7 @@ acc_all3b<-round(rbind(accd3,acce3,accf3,accg3,acch3),2)
 performIBus3<-data.frame(Models,acc_all3b)
 ````
 
-##Predictions Report
+###Predictions Report
 Internet Bussines Predictions by service provider
 ````{r}
 predIBus1<-data.frame(data_pred1b,data_predlog1,data_predgom1) #Operator 1 
@@ -720,7 +721,7 @@ predIBus2<-data.frame(data_pred2b,data_predlog2,data_predgom2) #Operator 2
 predIBus3<-data.frame(data_pred3b,data_predlog3,data_predgom3) #Operator 3 
 ````
 
-##Forecast Reports
+###Forecast Reports
 Forecasting for 5 Years Internet Bussines
 ````{r}
 foreIBus1<-data.frame(fore3a,fore4a)  #Operator 1
@@ -735,28 +736,36 @@ foreIBus3<-data.frame(fore3c,fore4c)  #Operator 3
 ````{r}
 dataVoD1<-data.frame(Year=year,Subs=oper1$VoD1)  #Operator 1
 tssubs1<-ts(oper1$VoD1,start=start,end=end) #Time serie
+
 dataVoD2<-data.frame(Year=year,Subs=oper2$VoD2)  #Operator 2
 tssubs2<-ts(oper2$VoD2,start=start,end=end) #Time serie
+
 dataVoD3<-data.frame(Year=year,Subs=oper3$VoD3)  #Operator 3
 tssubs3<-ts(oper3$VoD3,start=start,end=end) #Time serie
 ````
 
 ##3.1.Predicting with Logistic and Gompertz Model VoD
-##Logistic Model
+###Logistic Model
 
 ````{r}
 #Operator 1
 alpha1<-tssubs1[hi] +0.5           #upper asymptote (M)
 Y1<-log(alpha1/tssubs1-1)*1          #Transform
-Reglm1<-tslm(Y1~trend)             #Lineal Regression  #ERROR
+Reglm1<-tslm(Y1~trend)             #Lineal Regression 
 parmlm1<-as.list(Reglm1$coeff)
 
 beta1<- exp(parmlm1$"(Intercept)")  #growth range (a)
 k1<- -parmlm1$trend                 #growth rate (b)
 fitlog1 <- logistic(1:10, alpha1, beta1, k1)
+tslog1<-ts(fitlog1,start=start,end=end)
 predlog1<-forecast(fitlog1,h=seth)
-a<-predict(fitlog1,h=seth)
-plot(a)
+predlog1<-forecast(tslog1,h=seth)
+
+plot(tssubs1, main="Modelo logístico")
+lines(tslog1,col="firebrick4")
+plot(predlog1,main="Forecast from Logistic")
+lines(tssubs1,col="darkgreen")
+
 #Operator 2
 alpha2<-tssubs2[hi] +0.5           #upper asymptote (M)
 Y2<-log(alpha2/tssubs2-1)          #Transform
@@ -780,7 +789,7 @@ fitlog3 <- logistic(1:10, alpha3, beta3, k3)
 predlog3<-forecast(fitlog3,h=seth)
 ````
 
-##The predictions using logistic model are:
+The predictions using logistic model are:
 ````{r}
 set4a<-data.frame(predlog1)
 alog<-set4a$Point.Forecast   #Operator 1 predictions
@@ -839,7 +848,7 @@ fitgom3 <- gompertz(1:10, alphag3, betag3, kg3)
 predgom3<-forecast(fitgom3,h=seth)
 ````
 
-##The predictions using gompertz model are:
+The predictions using gompertz model are:
 ````{r}
 set5a<-data.frame(predgom1)
 agom<-set5a$Point.Forecast   #Operator 1 predictions
@@ -883,7 +892,7 @@ parc<-data.frame(Fore_Par3=set2c$Point.Forecast)
 
 ````
 
-##Forecasting for 5 years
+###Forecasting for 5 years
 ````{r}
 fore5a<-data.frame(Fore_Log1=alog[1:5],Fore_Gom1=agom[1:5],Fore_Par1=forepar1)
 fore5b<-data.frame(Fore_Log2=blog[1:5],Fore_Gom2=bgom[1:5],Fore_Par2=forepar2)
@@ -904,6 +913,8 @@ fitpry1<-tslm(transf1~trend)        #model
 set5a<-fitpry1$fitted.values
 predpry1<-L1/(1+exp(set5a))         #Prediction
 forepry1<-forecast(predpry1,h=seth) #Forecast
+plot(predpry1, main="Ajuste de Modelo Fisher-Pry")
+lines(tssubs1,col="darkorange4")
 
 #Operator 2
 L2<-tssubs2[hi]+5                    #upper asymptote (L)
@@ -932,7 +943,6 @@ forepry3<-forecast(predpry3,h=seth) #Forecast
 **q** The coefficient of imitation
 
 ````{r}
-
 #Operator1
 setbas1<-subset(dataVoD1,Subs>=0.11)
 setbas2<-subset(dataVoD1,Subs<0.11)
@@ -940,12 +950,13 @@ demand1<-tssubs1[(tssubs1)>=0.11]
 time<-1:length(demand1)
 Tdelt <- time     #Accuracy, size predictions
 
-Bass.nls <- nls(demand1 ~ M * (((P + Q)^2/P) * exp(-(P + Q) * time))/(1 + (Q/P) 
-                                                                      *exp(-(P + Q) * time))^2, start = list(M = 60630, P = 0.03, Q = 0.38))
+Bass.nls <- nls(demand1 ~ M*(((P + Q)^2/P)*exp(-(P + Q)*time))/(1+(Q/P)*exp(-(P + Q)*time))^2,start = list(M = 60630, P = 0.03, Q = 0.38))
+
 Bcoef <- coef(Bass.nls) # get coefficient operator 1
 m <- Bcoef[1]
 p <- Bcoef[2]
 q <- Bcoef[3]
+
 ngete <- exp(-(p + q) * Tdelt)  #Setting the starting values for M to the Subs
 
 fitbas1 <- m * ((p + q)^2/p) * ngete/(1 + (q/p) * ngete)^2   #Model
@@ -954,7 +965,8 @@ x<-nrow(setbas2)
 cero<-data.frame(Year=setbas2$Year,Subs=c(1:x*0))
 predbas1<-rbind(cero,setbas3)
 forebas1<-forecast(predbas1$Subs,h=seth)                     #Forecast
-
+plot(predbas1,type="l",main="Ajuste de modelo con Bass-Model")
+lines(tssubs1,col="hotpink4")
 
 #Operator2
 setbas1<-subset(dataVoD2,Subs>=0.101)
@@ -963,8 +975,10 @@ demand2<-tssubs2[(tssubs2)>=0.101]
 time<-1:length(demand2)
 Tdelt <- time     #Accuracy, size predictions
 
-Bass.nls <- nls(demand2 ~ M * (((P + Q)^2/P)*exp(-(P + Q) * time))/
-                  (1 + (Q/P)*exp(-(P + Q) * time))^2, start = list(M = 60630, P = 0.03, Q = 0.38))
+Bass.nls <- nls(demand1 ~ M * (((P + Q)^2/P) * 
+            exp(-(P + Q)*time))/(1+(Q/P)*exp(-(P + Q) * time))^2, 
+            start = list(M = 60630, P = 0.03, Q = 0.38))
+
 Bcoef <- coef(Bass.nls) # get coefficient operator 1
 m <- Bcoef[1]
 p <- Bcoef[2]
@@ -985,8 +999,10 @@ demand3<-tssubs3[(tssubs3)>=0.101]
 time<-1:length(demand3)
 Tdelt <- time     #Accuracy, size predictions
 
-Bass.nls <- nls(demand3 ~ M * (((P + Q)^2/P) * exp(-(P + Q) * time))/(1 + (Q/P) 
-                                                                      *exp(-(P + Q) * time))^2, start = list(M = 60630, P = 0.03, Q = 0.38))
+Bass.nls <- nls(demand1 ~ M * (((P + Q)^2/P) * 
+            exp(-(P + Q)*time))/(1+(Q/P)*exp(-(P + Q) * time))^2, 
+            start = list(M = 60630, P = 0.03, Q = 0.38))
+
 Bcoef <- coef(Bass.nls) # get coefficient operator 1
 m <- Bcoef[1]
 p <- Bcoef[2]
@@ -1023,7 +1039,7 @@ data_pred2c<-data.frame(Pry2=predpry2,Bass2=predbas2$Subs)
 data_pred3c<-data.frame(Pry3=predpry3,Bass3=predbas3$Subs)
 ````
 
-#Forecasting for 5 years
+###Forecasting for 5 years
 ````{r}
 fore6a<-data.frame(Fore_Pry1=apry[1:5],Fore_Bas1=abas[1:5])
 fore6b<-data.frame(Fore_Pry2=bpry[1:5],Fore_Bas2=bbas[1:5])
@@ -1099,7 +1115,7 @@ performVoD3<-data.frame(Models,acc_all3b)
 ````
 
 
-##Predictions Reports
+###Predictions Reports
 ````{r}
 #Internet Residential Predictions by service provider
 predVoD1<-data.frame(data_predlog1,data_predgom1,data_predpar1,data_pred1c) #Operator 1 
@@ -1108,7 +1124,7 @@ predVoD3<-data.frame(data_predlog3,data_predgom3,data_predpar3,data_pred3c) #Ope
 ````
 
 
-##Forecast Reports
+###Forecast Reports
 Forecasting for 5 Years Video on Demand 
 ````{r}
 foreVoD1<-data.frame(fore5a,fore6a)  #Operator 1
@@ -1117,7 +1133,7 @@ foreVoD3<-data.frame(fore5c,fore6c)  #Operator 3
 ````
 
 
-#Demand Models for VoIP Subscribers
+#4.Demand Models for VoIP Subscribers
 
 ##Subset data
 ````{r}
@@ -1180,7 +1196,7 @@ data_predlog2<-data.frame(Log2=fitlog2)
 data_predlog3<-data.frame(Log3=fitlog3)
 ````
 
-###Gompertz Model
+###Gompertz Model VoIP
 ````{r}
 #Operator 1
 alphag1<-tssubs1[hi] +5                 #upper asymptote (M)
@@ -1231,7 +1247,7 @@ data_predgom2<-data.frame(Gom2=fitgom2)
 data_predgom3<-data.frame(Gom3=fitgom3)
 ````
 
-###Parabolic Model
+##4.2 Parabolic Model VoIP
 ````{r}
 time<-1:hi
 #Operator 1
@@ -1262,7 +1278,7 @@ parc<-data.frame(Fore_Par3=set2c$Point.Forecast)
 ````
 
 
-###Forecasting for 5 years
+###Forecasting for 5 years VoIP
 ````{r}
 fore7a<-data.frame(Fore_Log1=alog[1:5],Fore_Gom1=agom[1:5],Fore_Par1=forepar1)
 fore7b<-data.frame(Fore_Log2=blog[1:5],Fore_Gom2=bgom[1:5],Fore_Par1=forepar1)
@@ -1270,7 +1286,7 @@ fore7c<-data.frame(Fore_Log3=clog[1:5],Fore_Gom3=cgom[1:5],Fore_Par1=forepar1)
 ````
 
 
-##Predicting with Fisher Pry
+##4.3 Predicting with Fisher Pry
 Model applied When substitution is driven by superior technology. 
 The new product or service presents some technological advantage over the old one.
 
@@ -1304,7 +1320,7 @@ forepry3<-forecast(predpry3,h=seth) #Forecast
 ````
 
 
-##12. Bass Model                                              
+##4.4 Bass Model                                              
 **m** Total number of potential buyers of the new product
 **p** The coefficient of innovation
 **q** The coefficient of imitation
@@ -1313,12 +1329,14 @@ forepry3<-forecast(predpry3,h=seth) #Forecast
 #Operator1
 setbas1<-subset(dataVoIP1,Subs>=0.11)
 setbas2<-subset(dataVoIP1,Subs<0.11)
-demand1<-tssubs1[(tssubs1)>=0.11]
+demand1<-tssubs1#[(tssubs1)>=0.11]
 time<-1:length(demand1)
 Tdelt <- time     #Accuracy, size predictions
 
-Bass.nls <- nls(demand1 ~ M * (((P + Q)^2/P) * exp(-(P + Q) * time))/(1 + (Q/P) 
-                                                                      *exp(-(P + Q) * time))^2, start = list(M = 60630, P = 0.03, Q = 0.38))
+Bass.nls <- nls(demand1 ~ M * (((P + Q)^2/P) * 
+            exp(-(P + Q)*time))/(1+(Q/P)*exp(-(P + Q) * time))^2, 
+            start = list(M = 60630, P = 0.03, Q = 0.38))
+
 Bcoef <- coef(Bass.nls) # get coefficient operator 1
 m <- Bcoef[1]
 p <- Bcoef[2]
@@ -1326,10 +1344,11 @@ q <- Bcoef[3]
 ngete <- exp(-(p + q) * Tdelt)  #Setting the starting values for M to the Subs
 
 fitbas1 <- m * ((p + q)^2/p) * ngete/(1 + (q/p) * ngete)^2   #Model
-setbas3<-data.frame(Year=setbas1$Year,Subs=fitbas1)             #Prediction
-x<-nrow(setbas2)
-cero<-data.frame(Year=setbas2$Year,Subs=c(1:x*0))
-predbas1<-rbind(cero,setbas3)
+setbas3<-data.frame(Year=setbas2$Year,Subs=fitbas1)          #Prediction
+#x<-nrow(setbas2)
+#cero<-data.frame(Year=setbas2$Year,Subs=c(1:x*0))
+#predbas1<-rbind(cero,setbas3)
+predbas1<-setbas3
 forebas1<-forecast(predbas1$Subs,h=seth)                     #Forecast
 
 #Operator2
@@ -1339,8 +1358,10 @@ demand2<-tssubs2[(tssubs2)>=0.11]
 time<-1:length(demand2)
 Tdelt <- time     #Accuracy, size predictions
 
-Bass.nls <- nls(demand2 ~ M * (((P + Q)^2/P) * exp(-(P + Q) * time))/(1 + (Q/P) 
-                                                                      *exp(-(P + Q) * time))^2, start = list(M = 60630, P = 0.03, Q = 0.38))
+Bass.nls <- nls(demand1 ~ M * (((P + Q)^2/P) * 
+            exp(-(P + Q)*time))/(1+(Q/P)*exp(-(P + Q) * time))^2, 
+            start = list(M = 60630, P = 0.03, Q = 0.38))
+
 Bcoef <- coef(Bass.nls) # get coefficient operator 1
 m <- Bcoef[1]
 p <- Bcoef[2]
@@ -1361,8 +1382,10 @@ demand3<-tssubs3[(tssubs3)>=0.11]
 time<-1:length(demand3)
 Tdelt <- time     #Accuracy, size predictions
 
-Bass.nls <- nls(demand3 ~ M * (((P + Q)^2/P) * exp(-(P + Q) * time))/(1 + (Q/P) 
-                                                                      *exp(-(P + Q) * time))^2, start = list(M = 60630, P = 0.03, Q = 0.38))
+Bass.nls <- nls(demand1 ~ M * (((P + Q)^2/P) * 
+            exp(-(P + Q)*time))/(1+(Q/P)*exp(-(P + Q) * time))^2, 
+            start = list(M = 60630, P = 0.03, Q = 0.38))
+
 Bcoef <- coef(Bass.nls) # get coefficient operator 1
 m <- Bcoef[1]
 p <- Bcoef[2]
@@ -1399,14 +1422,14 @@ data_pred2c<-data.frame(Pry2=predpry2,Bass2=predbas2$Subs)
 data_pred3c<-data.frame(Pry3=predpry3,Bass3=predbas3$Subs)
 ````
 
-##Forecasting for 5 years
+###Forecasting for 5 years
 ````{r}
 fore8a<-data.frame(Fore_Pry1=apry[1:5],Fore_Bas1=abas[1:5])
 fore8b<-data.frame(Fore_Pry2=bpry[1:5],Fore_Bas2=bbas[1:5])
 fore8c<-data.frame(Fore_Pry3=cpry[1:5],Fore_Bas3=cbas[1:5])
 ````
 
-##13.Performance Models for VoIP
+##4.5 Performance Models for VoIP
 Using the forecast package, the performance models are:
 **(ME)**:Mean Error 
 **(RMSE)**:Root Mean Square Error
@@ -1474,7 +1497,7 @@ performVoIP3<-data.frame(Models,acc_all3b)
 ````
 
 
-##Predictions Reports
+###Predictions Reports
 VoIP Predictions by service provider
 ````{r}
 predVoIP1<-data.frame(data_predlog1,data_predgom1,data_predpar1,data_pred1c) #Operator 1 
@@ -1491,42 +1514,73 @@ foreVoIP3<-data.frame(fore7c,fore8c)  #Operator 3
 ````
 
 
-#Predictions, Forecast and Performance Reports
+#5.Predictions, Forecast and Performance Reports
 
+`````{r echo=TRUE}
+library(knitr)
+````
 ##Predictions Report
-````{r}
+The data set for fit each model are:
+
+````{r,echo=TRUE}
 predIRes<-round(data.frame(predIRes1,predIRes2,predIRes3),2)
 predIBus<-round(data.frame(predIBus1,predIBus2,predIBus3),2)
 predVoD<-round(data.frame(predVoD1,predVoD2,predVoD3),2)
 predVoIP<-round(data.frame(predVoIP1,predVoIP2,predVoIP3),2)
 
-predict<-data.frame(Res=predIRes,VoD=predVoD,VoIP=predVoIP,Bus=predIBus)
-predict
-#write.csv2(predict,"Predictions_Report.csv")
+kable(predIRes,format = "markdown",caption = "Internet Residential")
+kable(predIBus,format = "markdown",caption = "Internet Bussines")
+kable(predVoD,format = "markdown",caption = "VoD")
+kable(predVoIP,format = "markdown",caption = "VoIP")
+
+#predictall<-data.frame(Res=predIRes,VoD=predVoD,VoIP=predVoIP,Bus=predIBus)
+#write.csv2(predictall,"Predictions_Report.csv")
 ````
 
 ##Forecast Report
-````{r}
+The forecast by model are:
+
+````{r,echo=FALSE}
+
 foreIRes<-round(data.frame(foreIRes1,foreIRes2,foreIRes3),2)
 foreIBus<-round(data.frame(foreIBus1,foreIBus2,foreIBus3),2)
 foreVoD<-round(data.frame(foreVoD1,foreVoD2,foreVoD3),2)
 foreVoIP<-round(data.frame(foreVoIP1,foreVoIP2,foreVoIP3),2)
 
-forecast<-data.frame(Res=foreIRes,VoD=foreVoD,VoIP=foreVoIP,Bus=foreIBus)
-forecast
-#write.csv2(forecast,"Forecasting_Report.csv")
+kable(foreIRes1,format = "markdown",caption = "Internet Residential - OP1")
+kable(foreIRes2,format = "markdown",caption = "Internet Residential - OP2")
+kable(foreIRes3,format = "markdown",caption = "Internet Residential - OP3")
+
+kable(foreIBus1,format = "markdown",caption = "Internet Bussines - OP1")
+kable(foreIBus2,format = "markdown",caption = "Internet Bussines - OP2")
+kable(foreIBus3,format = "markdown",caption = "Internet Bussines - OP3")
+
+kable(foreVoD1,format = "markdown",caption = "VoD - OP1")
+kable(foreVoD2,format = "markdown",caption = "VoD - OP2")
+kable(foreVoD3,format = "markdown",caption = "VoD - OP3")
+
+kable(foreVoIP1,format = "markdown",caption = "VoIP - OP1")
+kable(foreVoIP2,format = "markdown",caption = "VoIP - OP2")
+kable(foreVoIP3,format = "markdown",caption = "VoIP - OP3")
+
+#forecastall<-data.frame(Res=foreIRes,VoD=foreVoD,VoIP=foreVoIP,Bus=foreIBus)
+#write.csv2(forecastall,"Forecasting_Report.csv")
 ````
 
 ##Performance Report
-````{r}
+````{r, echo=FALSE}
 performIRes<-data.frame(performIRes1,performIRes2[2:6],performIRes3[2:6]) #Internet Residential
 performIBus<-data.frame(performIBus1,performIBus2[2:6],performIBus3[2:6]) #Internet Bussines
 performVoD<-data.frame(performVoD1,performVoD2[2:6],performVoD3[2:6])     #Video on Demand
 performVoIP<-data.frame(performVoIP1,performVoIP2[2:6],performVoIP3[2:6]) #Voice over IP
 
-perform<-data.frame(Res=performIRes,VoD=performVoD,VoIP=performVoIP)#,performIBus)
-perform
-#write.csv2(perform,"Performance_Report.csv")
+kable(performIRes,format = "markdown")
+kable(performIBus,format = "markdown")
+kable(performVoD,format = "markdown")
+kable(performVoIP,format = "markdown")
+
+#performall<-data.frame(Res=performIRes,VoD=performVoD,VoIP=performVoIP)#,performIBus)
+#write.csv2(performall,"Performance_Report.csv")
 ````
 
 
