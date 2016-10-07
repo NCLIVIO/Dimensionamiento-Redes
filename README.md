@@ -4,11 +4,10 @@ Dimensionamiento de Redes
 Dimensionamiento de Redes Multiservicio
 
 ###Actividad 1. Modelos de Demanda
-##### Modelamiento  
-* [R code](./Actividad 1/GitHubActividad1/Forecast_models.R) : Archivo en **R**. Es el forecasting por Operador que genera un CSV para pegar en el     Clivio Model
+##### Modelamiento y Forecast  
 * [Markdown File] (./Actividad 1/GitHubActividad1/Final_Forecast.Rmd) : Este archivo contiene el código del forecast ed demanda
 * [Subscribers File](./Files/Subscribers_CV.csv) : Documento **CSV**. Este archivo contiene los datos históricos por operador
-* [Forecasting File](./Actividad 1/GitHubActividad1/Performance_models.csv) : Documento **CSV**. Este archivo contiene las evaluaciones de cada modelo por operador
+* [Forecasting PDF](./Actividad 1/GitHubActividad1/Final_Forecast.PDF) : Documento **PDF**. Este archivo el desarrollo completo y los resultados del análisis.
 
 ###Actividad 3. Modelamiento de Tráfico
 * [Markdown File](./Actividad 3/BW_Efectivo.rmd) : Este archivo contiene el cálculo del ancho de banda efectivo por usuario por servicio. **EN PROCESO DE ANÁLISIS** 
