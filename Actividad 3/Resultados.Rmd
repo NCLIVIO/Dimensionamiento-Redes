@@ -70,7 +70,7 @@ s<-log10(seq(length=100, from=1, to=5)) #space parameter (bytes^-1)
 tmax<-max(t)
 smin<-min(s)
 
-B<-(C-u)*((tmax*(1-H))/H) #ms
+B<-(C-u)*((t*(1-H))/H) #ms
 
 ````
 

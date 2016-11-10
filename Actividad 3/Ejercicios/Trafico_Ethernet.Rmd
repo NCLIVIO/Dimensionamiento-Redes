@@ -450,7 +450,7 @@ El presente análisis, se realiza con un enfoque paramétrico donde se trabaja c
 Esta traza de tráfico de BELLCORE labs, esta traza contiene 1000000 de paquetes y se encuentran en dos columnas, en formato ASCII, veinte bytes por línea. La primera línea muestra el tiempo en segundos desde el comienzo de la traza. La segunda columna muestra el tamaño del paquete en bytes, incluyendo parte del encabezado y el código de redundancia cíclica (CRC), tener encuenta que que con el protocolo Ethernet los paquetes poseen un tamaño mínimo de 64 bytes y un máximo de 1.518 bytes.
 
 ```{r echo=FALSE, fig.show='hide'}
-packets<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/Bellcore/BC-pAug89.csv",
+packets<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico y Cartera CV/Bellcore/BC-pAug89.csv",
                   header=TRUE,sep=";",na.strings="NA",dec=".")
 
 dataset<-data.frame(Seconds=packets$Seconds,Bytes=packets$Bytes)

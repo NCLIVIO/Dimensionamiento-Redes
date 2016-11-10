@@ -11,68 +11,69 @@ output: word_document
 ````{r echo=FALSE}
 #Incoming=Downstream
 
-traza1<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/5039556D06A0.csv",
-               header=TRUE,sep=",",na.strings="NA",dec=".")
-traza2<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/0011AEA17B96.csv",
+traza1<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/Subscribers_SA/Bitrate+for+CM_ 5039554F580D.csv",
+                header=TRUE,sep=",",na.strings="NA",dec=".")
+traza2<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/Subscribers_SA/Bitrate+for+CM_ 5039556D04A7.csv",
                  header=TRUE,sep=",",na.strings="NA",dec=".")
-traza3<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/001BD70A67A8.csv",
+traza3<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/Subscribers_SA/Bitrate+for+CM_ 5039556D0074.csv",
                  header=TRUE,sep=",",na.strings="NA",dec=".")
-traza4<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/386BBBDE3EF4.csv",
+traza4<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/Subscribers_SA/Bitrate+for+CM_ 50395547B04E .csv",
                  header=TRUE,sep=",",na.strings="NA",dec=".")
-traza5<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/7CBFB1B96514.csv",
+traza5<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_001ADE98D58A.csv",
                  header=TRUE,sep=",",na.strings="NA",dec=".")
-traza6<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/0011E659D0FD.csv",
+traza6<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_001BD7A7BDE4.csv",
                  header=TRUE,sep=",",na.strings="NA",dec=".")
-traza7<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/34BDFA8C66F3.csv",
+traza7<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_001BD710FADC.csv",
                  header=TRUE,sep=",",na.strings="NA",dec=".")
-traza8<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/0023BED75BEA.csv",
+traza8<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_001CEA64E4AC.csv",
                  header=TRUE,sep=",",na.strings="NA",dec=".")
-traza9<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/001BD7A7BDE4.csv",
-                 header=TRUE,sep=",",na.strings="NA",dec=".")
-
-traza10<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/001BD7BBF6CA.csv",
-                 header=TRUE,sep=",",na.strings="NA",dec=".")
-traza11<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/00159A6160B0.csv",
-                 header=TRUE,sep=",",na.strings="NA",dec=".")
-traza12<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/CC7D37981A49.csv",
-                 header=TRUE,sep=",",na.strings="NA",dec=".")
-traza13<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/0014E8295DC2.csv",
-                 header=TRUE,sep=",",na.strings="NA",dec=".")
-traza14<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/001ADE631B8A.csv",
-                 header=TRUE,sep=",",na.strings="NA",dec=".")
-traza15<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/0023BED18526.csv",
-                 header=TRUE,sep=",",na.strings="NA",dec=".")
-traza16<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/145BD1FD79DD.csv",
-                 header=TRUE,sep=",",na.strings="NA",dec=".")
-traza17<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/001BD70A514A.csv",
-                 header=TRUE,sep=",",na.strings="NA",dec=".")
-traza18<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/0025F2BD04AD.csv",
-                 header=TRUE,sep=",",na.strings="NA",dec=".")
-traza19<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/001BD710FADC.csv",
+traza9<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_7CBFB1B96514.csv",
                  header=TRUE,sep=",",na.strings="NA",dec=".")
 
-traza20<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/94CCB91B032C.csv",
+traza10<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_0014E8295DC2.csv",
                  header=TRUE,sep=",",na.strings="NA",dec=".")
-traza21<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/088039A22100.csv",
+traza11<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_0022CE977359.csv",
                  header=TRUE,sep=",",na.strings="NA",dec=".")
-traza22<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/0022CE977359.csv",
+traza12<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_0023BED75BEA.csv",
                  header=TRUE,sep=",",na.strings="NA",dec=".")
-traza23<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/001ADE98D58A.csv",
+traza13<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_34BDFA8A9080.csv",
                  header=TRUE,sep=",",na.strings="NA",dec=".")
-traza24<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/386BBB15666A.csv",
+traza14<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_34BDFA8BB6A9.csv",
                  header=TRUE,sep=",",na.strings="NA",dec=".")
-traza25<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/001CEA64E4AC.csv",
-                 header=TRUE,sep=",",na.strings="NA",dec=".")
-traza26<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/00223AEEC591.csv",
+traza15<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_34BDFA8C66F3.csv",
                   header=TRUE,sep=",",na.strings="NA",dec=".")
-traza27<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/503955693D40.csv",
+traza16<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_94CCB91B032C.csv",
                   header=TRUE,sep=",",na.strings="NA",dec=".")
-traza28<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/5039556995F6.csv",
+traza17<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_145BD1FD79DD.csv",
                   header=TRUE,sep=",",na.strings="NA",dec=".")
-traza29<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/34BDFA8A9080.csv",
+traza18<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_00159A4228E8.csv",
                   header=TRUE,sep=",",na.strings="NA",dec=".")
-traza30<-read.csv("C:/Users/NataliaA/Documents/Maestria/Tráfico L3/6 Mbps Res/6455B1495979.csv",
+traza19<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_00159A6160B0.csv",
                   header=TRUE,sep=",",na.strings="NA",dec=".")
+
+traza20<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_00223AEEC591.csv",
+                  header=TRUE,sep=",",na.strings="NA",dec=".")
+traza21<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_386BBB15666A.csv",
+                  header=TRUE,sep=",",na.strings="NA",dec=".")
+traza22<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_088039A22100.csv",
+                  header=TRUE,sep=",",na.strings="NA",dec=".")
+traza23<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_5039554DEF9A.csv",
+                  header=TRUE,sep=",",na.strings="NA",dec=".")
+traza24<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_5039556B3A1E.csv",
+                  header=TRUE,sep=",",na.strings="NA",dec=".")
+traza25<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_5039556D0074.csv",
+                  header=TRUE,sep=",",na.strings="NA",dec=".")
+traza26<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_50395547CC55.csv",
+                  header=TRUE,sep=",",na.strings="NA",dec=".")
+traza27<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_503955444D9B.csv",
+                  header=TRUE,sep=",",na.strings="NA",dec=".")
+traza28<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_503955693D40.csv",
+                  header=TRUE,sep=",",na.strings="NA",dec=".")
+traza29<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_5039554421B8.csv",
+                  header=TRUE,sep=",",na.strings="NA",dec=".")
+traza30<-read.csv("C:/Users/NataliaA/Documents/Maestria/TráficoL3/Subscribers_SA/Bitrate+for+CM_E48399206392.csv",
+                  header=TRUE,sep=",",na.strings="NA",dec=".")
+
 ````
 
 
@@ -86,92 +87,169 @@ Parámetro temporal **t**
 Parámetro espacial **s**
 
 ````{r}
-C<-6  #Capacidad del canal Mbps
-H<-0.8
+#Capacidad mámima Kbps
 
+Cmax<-6000  #Capacidad mámima Kbps
+
+DS<-data.frame(Time=traza1$Time.Description,DS=traza1$CM.DS.KBPS)
+setDS<-na.omit(DS)
+plot(setDS$DS,type="l",ylab="Kbps",xlab="Tiempo",main="Tráfico Fuente Internet 6M",sub="Fig1. Ejemplo de una fuente de Internet")
+abline(h=mean(DS$DS,na.rm = TRUE),col="pink",lty=3)
+abline(h=max(DS$DS,na.rm = TRUE),col="violet",lty=3)
+````
+
+Capacidad de cada fuente
+
+````{r}
+c1<-max(DS1)
+c2<-max(DS2)
+c3<-max(DS3)
+c4<-max(DS4)
+c5<-max(DS5)
+c6<-max(DS6)
+c7<-max(DS7)
+c8<-max(DS8)
+c9<-max(DS9)
+c10<-max(DS10)
+c11<-max(DS11)
+c12<-max(DS12)
+c13<-max(DS13)
+c14<-max(DS14)
+c15<-max(DS15)
+c16<-max(DS16)
+c17<-max(DS17)
+c18<-max(DS18)
+c19<-max(DS19)
+c20<-max(DS20)
+c21<-max(DS21)
+c22<-max(DS22)
+c23<-max(DS23)
+c24<-max(DS24)
+c25<-max(DS25)
+c26<-max(DS26)
+c27<-max(DS27)
+c28<-max(DS28)
+c29<-max(DS29)
+c30<-max(DS30)
+
+C<-c(c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15,c16,c17,c18,c19,c20,c21,c22,c23,c24,c25,c26,c27,c28,c29,c30)
+````
+
+Cálculo del parámetro HURST
+````{r}
+data<-setDS$DS
+h<-as.ts(data)
+RS<-rsFit(h, levels = 50, minnpts = 3, cut.off = 10^c(0.7, 2.5),
+          doplot = TRUE, trace = FALSE, title = NULL, description = NULL)
+H<-data.frame(RS@hurst)$H[1]
+RS
+````
+
+Se calcula para cada traza
+````{r}
+for (i in 1:30) {
+  cat("DS",i,"<-","na.omit(traza",i,"$CM.DS.KBPS, na.rm = TRUE)","\n",sep = "")
+}
+
+for (i in 1:30) {
+  cat("h",i,"<-","as.ts(DS",i,")","\n",sep = "")
+}
+
+for (i in 1:30) {
+  cat("RS",i,"<-","rsFit(h",i,",levels = 50, minnpts = 3, cut.off = 10^c(0.7, 2.5),doplot = TRUE, trace = FALSE, title = NULL, description = NULL)","\n",sep = "")
+}
+
+for (i in 1:30) {
+  cat("H",i,"<-","data.frame(RS",i,"@hurst)$H","[1]","\n",sep = "")
+}
+
+H<-c(H1=0.82,H2=0.82,H3=0.82,H4=0.82,H5=0.82,H6=0.82,H7=0.82,H8=0.82,H9=0.82,H10=0.82,
+     H11=0.82,H12=0.82,H13=0.82,H14=0.82,H15=0.82,H16=0.82,H17=0.82,H18=0.82,H19=0.82,
+     H20=0.82,H21=0.82,H22=0.82,H23=0.82,H24=0.82,H25=0.82,H26=0.82,H27=0.82,H28=0.82,
+     H29=0.82,H30=0.82)
 ````
 
 
 Calculando la tasa promedio de arribo de cada traza:
 ````{r}
 for (i in 1:30) {
-  cat("u",i,"<-","mean(traza",i,"$Total.Incoming.bps/1000000, na.rm = TRUE)","\n",sep = "")
+  cat("u",i,"<-","mean(traza",i,"$CM.DS.KBPS, na.rm = TRUE)","\n",sep = "")
 }
 ````
 
 
 ````{r echo=FALSE}
-u1<-mean(traza1$Total.Incoming.bps/1000000, na.rm = TRUE)
-u2<-mean(traza2$Total.Incoming.bps/1000000, na.rm = TRUE)
-u3<-mean(traza3$Total.Incoming.bps/1000000, na.rm = TRUE)
-u4<-mean(traza4$Total.Incoming.bps/1000000, na.rm = TRUE)
-u5<-mean(traza5$Total.Incoming.bps/1000000, na.rm = TRUE)
-u6<-mean(traza6$Total.Incoming.bps/1000000, na.rm = TRUE)
-u7<-mean(traza7$Total.Incoming.bps/1000000, na.rm = TRUE)
-u8<-mean(traza8$Total.Incoming.bps/1000000, na.rm = TRUE)
-u9<-mean(traza9$Total.Incoming.bps/1000000, na.rm = TRUE)
-u10<-mean(traza10$Total.Incoming.bps/1000000, na.rm = TRUE)
-u11<-mean(traza11$Total.Incoming.bps/1000000, na.rm = TRUE)
-u12<-mean(traza12$Total.Incoming.bps/1000000, na.rm = TRUE)
-u13<-mean(traza13$Total.Incoming.bps/1000000, na.rm = TRUE)
-u14<-mean(traza14$Total.Incoming.bps/1000000, na.rm = TRUE)
-u15<-mean(traza15$Total.Incoming.bps/1000000, na.rm = TRUE)
-u16<-mean(traza16$Total.Incoming.bps/1000000, na.rm = TRUE)
-u17<-mean(traza17$Total.Incoming.bps/1000000, na.rm = TRUE)
-u18<-mean(traza18$Total.Incoming.bps/1000000, na.rm = TRUE)
-u19<-mean(traza19$Total.Incoming.bps/1000000, na.rm = TRUE)
-u20<-mean(traza20$Total.Incoming.bps/1000000, na.rm = TRUE)
-u21<-mean(traza21$Total.Incoming.bps/1000000, na.rm = TRUE)
-u22<-mean(traza22$Total.Incoming.bps/1000000, na.rm = TRUE)
-u23<-mean(traza23$Total.Incoming.bps/1000000, na.rm = TRUE)
-u24<-mean(traza24$Total.Incoming.bps/1000000, na.rm = TRUE)
-u25<-mean(traza25$Total.Incoming.bps/1000000, na.rm = TRUE)
-u26<-mean(traza26$Total.Incoming.bps/1000000, na.rm = TRUE)
-u27<-mean(traza27$Total.Incoming.bps/1000000, na.rm = TRUE)
-u28<-mean(traza28$Total.Incoming.bps/1000000, na.rm = TRUE)
-u29<-mean(traza29$Total.Incoming.bps/1000000, na.rm = TRUE)
-u30<-mean(traza30$Total.Incoming.bps/1000000, na.rm = TRUE)
+u1<-mean(traza1$CM.DS.KBPS, na.rm = TRUE)
+u2<-mean(traza2$CM.DS.KBPS, na.rm = TRUE)
+u3<-mean(traza3$CM.DS.KBPS, na.rm = TRUE)
+u4<-mean(traza4$CM.DS.KBPS, na.rm = TRUE)
+u5<-mean(traza5$CM.DS.KBPS, na.rm = TRUE)
+u6<-mean(traza6$CM.DS.KBPS, na.rm = TRUE)
+u7<-mean(traza7$CM.DS.KBPS, na.rm = TRUE)
+u8<-mean(traza8$CM.DS.KBPS, na.rm = TRUE)
+u9<-mean(traza9$CM.DS.KBPS, na.rm = TRUE)
+u10<-mean(traza10$CM.DS.KBPS, na.rm = TRUE)
+u11<-mean(traza11$CM.DS.KBPS, na.rm = TRUE)
+u12<-mean(traza12$CM.DS.KBPS, na.rm = TRUE)
+u13<-mean(traza13$CM.DS.KBPS, na.rm = TRUE)
+u14<-mean(traza14$CM.DS.KBPS, na.rm = TRUE)
+u15<-mean(traza15$CM.DS.KBPS, na.rm = TRUE)
+u16<-mean(traza16$CM.DS.KBPS, na.rm = TRUE)
+u17<-mean(traza17$CM.DS.KBPS, na.rm = TRUE)
+u18<-mean(traza18$CM.DS.KBPS, na.rm = TRUE)
+u19<-mean(traza19$CM.DS.KBPS, na.rm = TRUE)
+u20<-mean(traza20$CM.DS.KBPS, na.rm = TRUE)
+u21<-mean(traza21$CM.DS.KBPS, na.rm = TRUE)
+u22<-mean(traza22$CM.DS.KBPS, na.rm = TRUE)
+u23<-mean(traza23$CM.DS.KBPS, na.rm = TRUE)
+u24<-mean(traza24$CM.DS.KBPS, na.rm = TRUE)
+u25<-mean(traza25$CM.DS.KBPS, na.rm = TRUE)
+u26<-mean(traza26$CM.DS.KBPS, na.rm = TRUE)
+u27<-mean(traza27$CM.DS.KBPS, na.rm = TRUE)
+u28<-mean(traza28$CM.DS.KBPS, na.rm = TRUE)
+u29<-mean(traza29$CM.DS.KBPS, na.rm = TRUE)
+u30<-mean(traza30$CM.DS.KBPS, na.rm = TRUE)
 ````
 
 Calculando las varianzas de cada traza
 
 ````{r}
 for (i in 1:30) {
-  cat("V",i,"<-","var(traza",i,"$Total.Incoming.bps/1000000, na.rm = TRUE)","\n",sep = "")
+  cat("V",i,"<-","var(traza",i,"$CM.DS.KBPS, na.rm = TRUE)","\n",sep = "")
 }
 ````
 
 ````{r echo=FALSE}
-V1<-var(traza1$Total.Incoming.bps/1000000, na.rm = TRUE)
-V2<-var(traza2$Total.Incoming.bps/1000000, na.rm = TRUE)
-V3<-var(traza3$Total.Incoming.bps/1000000, na.rm = TRUE)
-V4<-var(traza4$Total.Incoming.bps/1000000, na.rm = TRUE)
-V5<-var(traza5$Total.Incoming.bps/1000000, na.rm = TRUE)
-V6<-var(traza6$Total.Incoming.bps/1000000, na.rm = TRUE)
-V7<-var(traza7$Total.Incoming.bps/1000000, na.rm = TRUE)
-V8<-var(traza8$Total.Incoming.bps/1000000, na.rm = TRUE)
-V9<-var(traza9$Total.Incoming.bps/1000000, na.rm = TRUE)
-V10<-var(traza10$Total.Incoming.bps/1000000, na.rm = TRUE)
-V11<-var(traza11$Total.Incoming.bps/1000000, na.rm = TRUE)
-V12<-var(traza12$Total.Incoming.bps/1000000, na.rm = TRUE)
-V13<-var(traza13$Total.Incoming.bps/1000000, na.rm = TRUE)
-V14<-var(traza14$Total.Incoming.bps/1000000, na.rm = TRUE)
-V15<-var(traza15$Total.Incoming.bps/1000000, na.rm = TRUE)
-V16<-var(traza16$Total.Incoming.bps/1000000, na.rm = TRUE)
-V17<-var(traza17$Total.Incoming.bps/1000000, na.rm = TRUE)
-V18<-var(traza18$Total.Incoming.bps/1000000, na.rm = TRUE)
-V19<-var(traza19$Total.Incoming.bps/1000000, na.rm = TRUE)
-V20<-var(traza20$Total.Incoming.bps/1000000, na.rm = TRUE)
-V21<-var(traza21$Total.Incoming.bps/1000000, na.rm = TRUE)
-V22<-var(traza22$Total.Incoming.bps/1000000, na.rm = TRUE)
-V23<-var(traza23$Total.Incoming.bps/1000000, na.rm = TRUE)
-V24<-var(traza24$Total.Incoming.bps/1000000, na.rm = TRUE)
-V25<-var(traza25$Total.Incoming.bps/1000000, na.rm = TRUE)
-V26<-var(traza26$Total.Incoming.bps/1000000, na.rm = TRUE)
-V27<-var(traza27$Total.Incoming.bps/1000000, na.rm = TRUE)
-V28<-var(traza28$Total.Incoming.bps/1000000, na.rm = TRUE)
-V29<-var(traza29$Total.Incoming.bps/1000000, na.rm = TRUE)
-V30<-var(traza30$Total.Incoming.bps/1000000, na.rm = TRUE)
+V1<-var(traza1$CM.DS.KBPS, na.rm = TRUE)
+V2<-var(traza2$CM.DS.KBPS, na.rm = TRUE)
+V3<-var(traza3$CM.DS.KBPS, na.rm = TRUE)
+V4<-var(traza4$CM.DS.KBPS, na.rm = TRUE)
+V5<-var(traza5$CM.DS.KBPS, na.rm = TRUE)
+V6<-var(traza6$CM.DS.KBPS, na.rm = TRUE)
+V7<-var(traza7$CM.DS.KBPS, na.rm = TRUE)
+V8<-var(traza8$CM.DS.KBPS, na.rm = TRUE)
+V9<-var(traza9$CM.DS.KBPS, na.rm = TRUE)
+V10<-var(traza10$CM.DS.KBPS, na.rm = TRUE)
+V11<-var(traza11$CM.DS.KBPS, na.rm = TRUE)
+V12<-var(traza12$CM.DS.KBPS, na.rm = TRUE)
+V13<-var(traza13$CM.DS.KBPS, na.rm = TRUE)
+V14<-var(traza14$CM.DS.KBPS, na.rm = TRUE)
+V15<-var(traza15$CM.DS.KBPS, na.rm = TRUE)
+V16<-var(traza16$CM.DS.KBPS, na.rm = TRUE)
+V17<-var(traza17$CM.DS.KBPS, na.rm = TRUE)
+V18<-var(traza18$CM.DS.KBPS, na.rm = TRUE)
+V19<-var(traza19$CM.DS.KBPS, na.rm = TRUE)
+V20<-var(traza20$CM.DS.KBPS, na.rm = TRUE)
+V21<-var(traza21$CM.DS.KBPS, na.rm = TRUE)
+V22<-var(traza22$CM.DS.KBPS, na.rm = TRUE)
+V23<-var(traza23$CM.DS.KBPS, na.rm = TRUE)
+V24<-var(traza24$CM.DS.KBPS, na.rm = TRUE)
+V25<-var(traza25$CM.DS.KBPS, na.rm = TRUE)
+V26<-var(traza26$CM.DS.KBPS, na.rm = TRUE)
+V27<-var(traza27$CM.DS.KBPS, na.rm = TRUE)
+V28<-var(traza28$CM.DS.KBPS, na.rm = TRUE)
+V29<-var(traza29$CM.DS.KBPS, na.rm = TRUE)
+V30<-var(traza30$CM.DS.KBPS, na.rm = TRUE)
 `````
 
 Los datos de las trazas son:
@@ -191,23 +269,257 @@ tabla<-data.frame("Taza Arribo"=u,"Varianza Arribo"=v)
 tabla
 ````
 
+Eliminando los valores "NA"
+
+````{r}
+DS1<-na.omit(traza1$CM.DS.KBPS, na.rm = TRUE)
+DS2<-na.omit(traza2$CM.DS.KBPS, na.rm = TRUE)
+DS3<-na.omit(traza3$CM.DS.KBPS, na.rm = TRUE)
+DS4<-na.omit(traza4$CM.DS.KBPS, na.rm = TRUE)
+DS5<-na.omit(traza5$CM.DS.KBPS, na.rm = TRUE)
+DS6<-na.omit(traza6$CM.DS.KBPS, na.rm = TRUE)
+DS7<-na.omit(traza7$CM.DS.KBPS, na.rm = TRUE)
+DS8<-na.omit(traza8$CM.DS.KBPS, na.rm = TRUE)
+DS9<-na.omit(traza9$CM.DS.KBPS, na.rm = TRUE)
+DS10<-na.omit(traza10$CM.DS.KBPS, na.rm = TRUE)
+DS11<-na.omit(traza11$CM.DS.KBPS, na.rm = TRUE)
+DS12<-na.omit(traza12$CM.DS.KBPS, na.rm = TRUE)
+DS13<-na.omit(traza13$CM.DS.KBPS, na.rm = TRUE)
+DS14<-na.omit(traza14$CM.DS.KBPS, na.rm = TRUE)
+DS15<-na.omit(traza15$CM.DS.KBPS, na.rm = TRUE)
+DS16<-na.omit(traza16$CM.DS.KBPS, na.rm = TRUE)
+DS17<-na.omit(traza17$CM.DS.KBPS, na.rm = TRUE)
+DS18<-na.omit(traza18$CM.DS.KBPS, na.rm = TRUE)
+DS19<-na.omit(traza19$CM.DS.KBPS, na.rm = TRUE)
+DS20<-na.omit(traza20$CM.DS.KBPS, na.rm = TRUE)
+DS21<-na.omit(traza21$CM.DS.KBPS, na.rm = TRUE)
+DS22<-na.omit(traza22$CM.DS.KBPS, na.rm = TRUE)
+DS23<-na.omit(traza23$CM.DS.KBPS, na.rm = TRUE)
+DS24<-na.omit(traza24$CM.DS.KBPS, na.rm = TRUE)
+DS25<-na.omit(traza25$CM.DS.KBPS, na.rm = TRUE)
+DS26<-na.omit(traza26$CM.DS.KBPS, na.rm = TRUE)
+DS27<-na.omit(traza27$CM.DS.KBPS, na.rm = TRUE)
+DS28<-na.omit(traza28$CM.DS.KBPS, na.rm = TRUE)
+DS29<-na.omit(traza29$CM.DS.KBPS, na.rm = TRUE)
+DS30<-na.omit(traza30$CM.DS.KBPS, na.rm = TRUE)
+````
+
+
 calculando los parámetros temporal y espacial de cada traza
 
 ````{r}
-B<-0.150 
+time<-log10(seq(length=100, from=1.1, to=100))    #time parameter (ms)
+t<-time
 
-t<-round((B/(C-u))*(H/(1-H)),2)      #time parameter (us)
-s<-round((B+(C+u)*t)/(v*t^(2*H)),2) #space parameter (bitss^-1)
+for (i in 1:30) {
+  cat("B",i,"<-(C",i,"-u",i,")*((t*(1-H))/H)","\n",sep="")
+  }
 
-#t<-log10(seq(length=100, from=1, to=200))    #time parameter (us)
-#s<-log10(seq(length=100, from=1, to=5)) #space parameter (bits^-1)
+#B<-(C-u)*((t*(1-H))/H) #ms
+B1<-(C1-u1)*((t*(1-H))/H)
+B2<-(C2-u2)*((t*(1-H))/H)
+B3<-(C3-u3)*((t*(1-H))/H)
+B4<-(C4-u4)*((t*(1-H))/H)
+B5<-(C5-u5)*((t*(1-H))/H)
+B6<-(C6-u6)*((t*(1-H))/H)
+B7<-(C7-u7)*((t*(1-H))/H)
+B8<-(C8-u8)*((t*(1-H))/H)
+B9<-(C9-u9)*((t*(1-H))/H)
+B10<-(C10-u10)*((t*(1-H))/H)
+B11<-(C11-u11)*((t*(1-H))/H)
+B12<-(C12-u12)*((t*(1-H))/H)
+B13<-(C13-u13)*((t*(1-H))/H)
+B14<-(C14-u14)*((t*(1-H))/H)
+B15<-(C15-u15)*((t*(1-H))/H)
+B16<-(C16-u16)*((t*(1-H))/H)
+B17<-(C17-u17)*((t*(1-H))/H)
+B18<-(C18-u18)*((t*(1-H))/H)
+B19<-(C19-u19)*((t*(1-H))/H)
+B20<-(C20-u20)*((t*(1-H))/H)
+B21<-(C21-u21)*((t*(1-H))/H)
+B22<-(C22-u22)*((t*(1-H))/H)
+B23<-(C23-u23)*((t*(1-H))/H)
+B24<-(C24-u24)*((t*(1-H))/H)
+B25<-(C25-u25)*((t*(1-H))/H)
+B26<-(C26-u26)*((t*(1-H))/H)
+B27<-(C27-u27)*((t*(1-H))/H)
+B28<-(C28-u28)*((t*(1-H))/H)
+B29<-(C29-u29)*((t*(1-H))/H)
+B30<-(C30-u30)*((t*(1-H))/H)
+
+#t<-round((B/(C-u))*(H/(1-H)),3)      #time parameter (us)
+for (i in 1:30) {
+  cat("t",i,"<-round(B",i,"/(C",i,"-u",i,"))*(H/(1-H)),3)","\n",sep="")
+  }
+
+t1<-round(B1/(C1-u1))*(H/(1-H)),3)
+t2<-round(B2/(C2-u2))*(H/(1-H)),3)
+t3<-round(B3/(C3-u3))*(H/(1-H)),3)
+t4<-round(B4/(C4-u4))*(H/(1-H)),3)
+t5<-round(B5/(C5-u5))*(H/(1-H)),3)
+t6<-round(B6/(C6-u6))*(H/(1-H)),3)
+t7<-round(B7/(C7-u7))*(H/(1-H)),3)
+t8<-round(B8/(C8-u8))*(H/(1-H)),3)
+t9<-round(B9/(C9-u9))*(H/(1-H)),3)
+t10<-round(B10/(C10-u10))*(H/(1-H)),3)
+t11<-round(B11/(C11-u11))*(H/(1-H)),3)
+t12<-round(B12/(C12-u12))*(H/(1-H)),3)
+t13<-round(B13/(C13-u13))*(H/(1-H)),3)
+t14<-round(B14/(C14-u14))*(H/(1-H)),3)
+t15<-round(B15/(C15-u15))*(H/(1-H)),3)
+t16<-round(B16/(C16-u16))*(H/(1-H)),3)
+t17<-round(B17/(C17-u17))*(H/(1-H)),3)
+t18<-round(B18/(C18-u18))*(H/(1-H)),3)
+t19<-round(B19/(C19-u19))*(H/(1-H)),3)
+t20<-round(B20/(C20-u20))*(H/(1-H)),3)
+t21<-round(B21/(C21-u21))*(H/(1-H)),3)
+t22<-round(B22/(C22-u22))*(H/(1-H)),3)
+t23<-round(B23/(C23-u23))*(H/(1-H)),3)
+t24<-round(B24/(C24-u24))*(H/(1-H)),3)
+t25<-round(B25/(C25-u25))*(H/(1-H)),3)
+t26<-round(B26/(C26-u26))*(H/(1-H)),3)
+t27<-round(B27/(C27-u27))*(H/(1-H)),3)
+t28<-round(B28/(C28-u28))*(H/(1-H)),3)
+t29<-round(B29/(C29-u29))*(H/(1-H)),3)
+t30<-round(B30/(C30-u30))*(H/(1-H)),3)
+
+#s<-round((B+(C-u)*t)/(v*t^(2*H)),3)   #space parameter (bitss^-1)
+for (i in 1:30) {
+  cat("s",i,"<-round(B",i,"+(C",i,"-u",i,")*t)/(v",i,"*t^(2*H)),3)","\n",sep="")
+  }
+
+s1<-round(B1+(C1-u1)*t)/(v1*t^(2*H)),3)
+s2<-round(B2+(C2-u2)*t)/(v2*t^(2*H)),3)
+s3<-round(B3+(C3-u3)*t)/(v3*t^(2*H)),3)
+s4<-round(B4+(C4-u4)*t)/(v4*t^(2*H)),3)
+s5<-round(B5+(C5-u5)*t)/(v5*t^(2*H)),3)
+s6<-round(B6+(C6-u6)*t)/(v6*t^(2*H)),3)
+s7<-round(B7+(C7-u7)*t)/(v7*t^(2*H)),3)
+s8<-round(B8+(C8-u8)*t)/(v8*t^(2*H)),3)
+s9<-round(B9+(C9-u9)*t)/(v9*t^(2*H)),3)
+s10<-round(B10+(C10-u10)*t)/(v10*t^(2*H)),3)
+s11<-round(B11+(C11-u11)*t)/(v11*t^(2*H)),3)
+s12<-round(B12+(C12-u12)*t)/(v12*t^(2*H)),3)
+s13<-round(B13+(C13-u13)*t)/(v13*t^(2*H)),3)
+s14<-round(B14+(C14-u14)*t)/(v14*t^(2*H)),3)
+s15<-round(B15+(C15-u15)*t)/(v15*t^(2*H)),3)
+s16<-round(B16+(C16-u16)*t)/(v16*t^(2*H)),3)
+s17<-round(B17+(C17-u17)*t)/(v17*t^(2*H)),3)
+s18<-round(B18+(C18-u18)*t)/(v18*t^(2*H)),3)
+s19<-round(B19+(C19-u19)*t)/(v19*t^(2*H)),3)
+s20<-round(B20+(C20-u20)*t)/(v20*t^(2*H)),3)
+s21<-round(B21+(C21-u21)*t)/(v21*t^(2*H)),3)
+s22<-round(B22+(C22-u22)*t)/(v22*t^(2*H)),3)
+s23<-round(B23+(C23-u23)*t)/(v23*t^(2*H)),3)
+s24<-round(B24+(C24-u24)*t)/(v24*t^(2*H)),3)
+s25<-round(B25+(C25-u25)*t)/(v25*t^(2*H)),3)
+s26<-round(B26+(C26-u26)*t)/(v26*t^(2*H)),3)
+s27<-round(B27+(C27-u27)*t)/(v27*t^(2*H)),3)
+s28<-round(B28+(C28-u28)*t)/(v28*t^(2*H)),3)
+s29<-round(B29+(C29-u29)*t)/(v29*t^(2*H)),3)
+s30<-round(B30+(C30-u30)*t)/(v30*t^(2*H)),3)
+
+
+#BWE<-round(u+(((s*v)/2)*(t^(2*H-1))),2)
+for (i in 1:30) {
+  cat("BWE",i,"<-round(u",i,"+(((s",i,"*v",i,")/2)*(t^(2*H-1))),2)","\n",sep="")
+  }
+
+BWE1<-round(u1+(((s1*v1)/2)*(t^(2*H-1))),2)
+BWE2<-round(u2+(((s2*v2)/2)*(t^(2*H-1))),2)
+BWE3<-round(u3+(((s3*v3)/2)*(t^(2*H-1))),2)
+BWE4<-round(u4+(((s4*v4)/2)*(t^(2*H-1))),2)
+BWE5<-round(u5+(((s5*v5)/2)*(t^(2*H-1))),2)
+BWE6<-round(u6+(((s6*v6)/2)*(t^(2*H-1))),2)
+BWE7<-round(u7+(((s7*v7)/2)*(t^(2*H-1))),2)
+BWE8<-round(u8+(((s8*v8)/2)*(t^(2*H-1))),2)
+BWE9<-round(u9+(((s9*v9)/2)*(t^(2*H-1))),2)
+BWE10<-round(u10+(((s10*v10)/2)*(t^(2*H-1))),2)
+BWE11<-round(u11+(((s11*v11)/2)*(t^(2*H-1))),2)
+BWE12<-round(u12+(((s12*v12)/2)*(t^(2*H-1))),2)
+BWE13<-round(u13+(((s13*v13)/2)*(t^(2*H-1))),2)
+BWE14<-round(u14+(((s14*v14)/2)*(t^(2*H-1))),2)
+BWE15<-round(u15+(((s15*v15)/2)*(t^(2*H-1))),2)
+BWE16<-round(u16+(((s16*v16)/2)*(t^(2*H-1))),2)
+BWE17<-round(u17+(((s17*v17)/2)*(t^(2*H-1))),2)
+BWE18<-round(u18+(((s18*v18)/2)*(t^(2*H-1))),2)
+BWE19<-round(u19+(((s19*v19)/2)*(t^(2*H-1))),2)
+BWE20<-round(u20+(((s20*v20)/2)*(t^(2*H-1))),2)
+BWE21<-round(u21+(((s21*v21)/2)*(t^(2*H-1))),2)
+BWE22<-round(u22+(((s22*v22)/2)*(t^(2*H-1))),2)
+BWE23<-round(u23+(((s23*v23)/2)*(t^(2*H-1))),2)
+BWE24<-round(u24+(((s24*v24)/2)*(t^(2*H-1))),2)
+BWE25<-round(u25+(((s25*v25)/2)*(t^(2*H-1))),2)
+BWE26<-round(u26+(((s26*v26)/2)*(t^(2*H-1))),2)
+BWE27<-round(u27+(((s27*v27)/2)*(t^(2*H-1))),2)
+BWE28<-round(u28+(((s28*v28)/2)*(t^(2*H-1))),2)
+BWE29<-round(u29+(((s29*v29)/2)*(t^(2*H-1))),2)
+BWE30<-round(u30+(((s30*v30)/2)*(t^(2*H-1))),2)
+
+#Optimización para s
+#s.nls<-nls(BWE~u+(((s*v)/2)*(t^(2*H-1))),start = list(s=0.004))
+#space<-as.numeric(coef(s.nls))
+
+for (i in 1:30) {
+  cat("s.nls",i,"<-nls(BWE",i,"~u",i,"+(((s",i,"*v",i,")/2)*(t^(2*H-1))),start = list(s=0.004))","\n",sep="")
+  }
+
+s.nls1<-nls(BWE1~u1+(((s1*v1)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls2<-nls(BWE2~u2+(((s2*v2)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls3<-nls(BWE3~u3+(((s3*v3)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls4<-nls(BWE4~u4+(((s4*v4)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls5<-nls(BWE5~u5+(((s5*v5)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls6<-nls(BWE6~u6+(((s6*v6)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls7<-nls(BWE7~u7+(((s7*v7)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls8<-nls(BWE8~u8+(((s8*v8)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls9<-nls(BWE9~u9+(((s9*v9)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls10<-nls(BWE10~u10+(((s10*v10)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls11<-nls(BWE11~u11+(((s11*v11)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls12<-nls(BWE12~u12+(((s12*v12)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls13<-nls(BWE13~u13+(((s13*v13)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls14<-nls(BWE14~u14+(((s14*v14)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls15<-nls(BWE15~u15+(((s15*v15)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls16<-nls(BWE16~u16+(((s16*v16)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls17<-nls(BWE17~u17+(((s17*v17)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls18<-nls(BWE18~u18+(((s18*v18)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls19<-nls(BWE19~u19+(((s19*v19)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls20<-nls(BWE20~u20+(((s20*v20)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls21<-nls(BWE21~u21+(((s21*v21)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls22<-nls(BWE22~u22+(((s22*v22)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls23<-nls(BWE23~u23+(((s23*v23)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls24<-nls(BWE24~u24+(((s24*v24)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls25<-nls(BWE25~u25+(((s25*v25)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls26<-nls(BWE26~u26+(((s26*v26)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls27<-nls(BWE27~u27+(((s27*v27)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls28<-nls(BWE28~u28+(((s28*v28)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls29<-nls(BWE29~u29+(((s29*v29)/2)*(t^(2*H-1))),start = list(s=0.004))
+s.nls30<-nls(BWE30~u30+(((s30*v30)/2)*(t^(2*H-1))),start = list(s=0.004))
+
+
+#Optimización para t
+#t.nls<-nls(BWE~u+(((s*v)/2)*(t^(2*H-1))),start = list(t=1))
+#time<-as.numeric(coef(t.nls))
+
+for (i in 1:30) {
+  cat("s.nls",i,"<-nls(BWE",i,"~u",i,"+(((s",i,"*v",i,")/2)*(t^(2*H-1))),start = list(s=0.004))","\n",sep="")
+  }
+
 ````
 
-Por lo tanto el ancho de banda efectivo para cada traza es:
+Calculando el ancho de banda efectivo en el punto crítico (s,t), para cada traza se obtiene:
 
 ````{r}
+t<-time
+s<-space
 BWE<-round(u+(((s*v)/2)*(t^(2*H-1))),2)
 BWE
+
+x<-u
+n<-BWE
+plot(setDS$DS,type="l",ylab="Kbps",xlab="Tiempo",main="Tráfico Fuente Internet 6M",ylim=c(0,6000))
+abline(h=n,col="red")
+abline(h=x,col="blue")
+grid()
 
 datos<-data.frame("Taza_Arribo"=u,"Varianza_Arribo"=v,"time"=t,"space"=s,BWE)
 datos
