@@ -10,8 +10,8 @@ Dimensionamiento de Redes Multiservicio
 * [Forecasting PDF](./Actividad 1/GitHubActividad1/Final_Forecast.PDF) : Documento **PDF**. Este archivo contiene el desarrollo completo y los resultados del análisis.
 
 ###Actividad 3. Modelamiento de Tráfico
-* [Markdown File](./Actividad 3/BW_Efectivo.rmd) : Este archivo contiene el cálculo del ancho de banda efectivo por usuario por servicio. **EN PROCESO DE ANÁLISIS** 
-* [Ancho de Banda Efectivo](./Actividad 3/BW_Efectivo.pdf) : Este es el archivo **PDF** del mark down del item anterior. 
-* [Tráfico Ethernet](./Actividad 3/Trafico_Ethernet.pdf) : Este es el archivo **PDF** que muestra varias pruebas basadas en trabajos hechos sobre el modelamiento de trafico para determinar el ancho de banda efectivo de n fuentes de tráfico. 
+* [Markdown File](./Actividad 3/Fuentes de Tráfico.Rmd) : Este archivo contiene el cálculo del ancho de banda efectivo por usuario por servicio. 
+* [Ancho de Banda Efectivo](./Actividad 3/Fuentes de Tráfico.docx) : Este es el archivo resultado del mark down del item anterior. 
+* [Tráfico Ethernet](./Actividad 3/Ejercicios/Trafico_Ethernet.pdf) : Este es el archivo **PDF** que muestra varias pruebas basadas en trabajos hechos sobre el modelamiento de trafico para determinar el ancho de banda efectivo de n fuentes de tráfico. 
 
 
